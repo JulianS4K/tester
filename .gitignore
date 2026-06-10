@@ -1,7 +1,19 @@
-node_modules/
+# Android / Gradle
+*.iml
+.gradle/
+/local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.keystore
+*.jks
+local.properties
+
+# Misc
 *.log
 .env
-.DS_Store
-data/
-dist/
-build/

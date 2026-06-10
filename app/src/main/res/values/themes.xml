@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose drives the real UI; this base theme is just a splash-free, action-bar-free shell. -->
+    <style name="Theme.Helm" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/helm_background</item>
+        <item name="android:statusBarColor">@color/helm_background</item>
+        <item name="android:navigationBarColor">@color/helm_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
