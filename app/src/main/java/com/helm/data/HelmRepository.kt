@@ -21,10 +21,15 @@ class HelmRepository(context: Context) {
     fun dailyTotals(from: String, to: String) = dao.dailyTotals(from, to)
 
     /** Pull the latest stats from the OS into the database. Safe to call often. */
-    suspend fun refreshUsage(): Boolean {
+    suspend fun refreshUsage(): Boolean = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
         val records = collector.collectForDay()
         if (records.isNotEmpty()) dao.upsertUsage(records)
-        return collector.hasUsageAccess()
+        collector.hasUsageAccess()
+    }
+
+    /** Bulk-insert manual logs (used by CSV import). */
+    suspend fun addLogs(entries: List<LogEntry>) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        entries.forEach { dao.insertLog(it) }
     }
 
     suspend fun millisForApp(day: String, pkg: String) = dao.millisForApp(day, pkg)

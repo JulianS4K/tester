@@ -1,5 +1,7 @@
 package com.helm.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -48,6 +50,11 @@ fun TrackScreen(vm: HelmViewModel) {
     val logs by vm.recentLogs.collectAsState()
     val settings by vm.settings.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
+    var importMsg by remember { mutableStateOf<String?>(null) }
+
+    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) vm.importCsv(uri) { importMsg = it }
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -62,6 +69,23 @@ fun TrackScreen(vm: HelmViewModel) {
             Modifier.fillMaxSize().padding(inner).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            item {
+                SectionCard("Import money (CSV)") {
+                    Text(
+                        "Import a bank / UPI statement. Helm auto-detects date, amount (or debit/credit), description and category columns.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = {
+                        csvLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain", "application/vnd.ms-excel", "*/*"))
+                    }) { Text("Choose CSV file") }
+                    importMsg?.let {
+                        Spacer(Modifier.height(4.dp))
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                    }
+                }
+            }
             if (logs.isEmpty()) {
                 item { SectionCard { Text("Nothing logged yet. Tap \"Add log\" to record mood, a habit, weight, sleep, an expense and more.") } }
             }

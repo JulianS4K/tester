@@ -97,4 +97,17 @@ class HelmViewModel(app: Application) : AndroidViewModel(app) {
         repo.insertDispatch(report)
         onDone()
     }
+
+    fun importCsv(uri: android.net.Uri, onResult: (String) -> Unit) = viewModelScope.launch {
+        val app = getApplication<Application>()
+        val text = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching {
+                app.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+            }.getOrNull()
+        }
+        if (text.isNullOrBlank()) { onResult("Couldn't read that file."); return@launch }
+        val result = com.helm.finance.CsvImporter.parse(text, settings.value.currency)
+        repo.addLogs(result.entries)
+        onResult("Imported ${result.entries.size} transactions · ${result.skipped} skipped (${result.detected}).")
+    }
 }
