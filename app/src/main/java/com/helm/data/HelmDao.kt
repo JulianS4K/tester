@@ -40,6 +40,9 @@ interface HelmDao {
     @Query("DELETE FROM log_entries WHERE id = :id")
     suspend fun deleteLog(id: Long)
 
+    @Query("DELETE FROM log_entries WHERE note = :note AND timestamp BETWEEN :from AND :to")
+    suspend fun deleteLogsByNote(note: String, from: Long, to: Long)
+
     @Query("SELECT * FROM log_entries ORDER BY timestamp DESC LIMIT :limit")
     fun recentLogs(limit: Int = 100): Flow<List<LogEntry>>
 

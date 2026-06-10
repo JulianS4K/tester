@@ -19,16 +19,18 @@ Everything stays on your device — no servers, no accounts, no cloud.
 | 🛑 **Control center** | Per-app **daily minute limits** and recurring **focus windows** (work / study / sleep). Limits notify you when hit. |
 | 📰 **The Dispatch** | Auto-generated daily/weekly digest of screen time, money, health and habits — delivered as a notification + in-app report. |
 | 🔒 **Bypass resistance** | PIN-gated settings; foreground watcher (accessibility) groundwork for Phase 2 enforcement. |
+| ❤️ **Health Connect sync** | Optional auto-import of steps, sleep, weight & workouts from Health Connect (Settings → Health Connect). |
+| 💳 **Finance CSV import** | Import a bank / UPI statement CSV on the Track tab; columns are auto-detected. |
 
-### Coming in Phase 2
+### Coming next
 - **Hard enforcement** — actually block over-limit / in-focus apps via the accessibility service + block screen.
-- **Health Connect** auto-sync (steps, sleep, heart rate, workouts) instead of manual entry.
-- **Bank/finance import** — CSV import now; account-aggregator / Plaid-style sync later.
+- **Live bank sync** — account-aggregator / Plaid-style; Helm never asks for raw bank credentials.
 - **Email delivery** of The Dispatch.
 
-> ℹ️ **Finance & health today:** logged manually (or CSV in Phase 2). Live bank
-> sync needs a regulated aggregator (India Account Aggregator / Plaid), which is a
-> deliberate Phase 2 item — Helm never asks for raw bank credentials.
+> ⚠️ **Health Connect version:** `connect-client` is pinned in
+> `gradle/libs.versions.toml` (`healthConnect`). Health Connect's API is
+> version-sensitive — if the first build fails on `com.helm.health.*`, bump that
+> version (e.g. to a newer `1.1.0-rcNN` / stable `1.1.0`) and re-sync.
 
 ---
 

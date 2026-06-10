@@ -1,8 +1,11 @@
 package com.helm.data
 
 import android.content.Context
+import com.helm.health.HealthConnectManager
 import com.helm.usage.UsageCollector
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 /** Single entry point the UI and workers use for data + actions. */
 class HelmRepository(context: Context) {
@@ -11,6 +14,7 @@ class HelmRepository(context: Context) {
     private val dao = HelmDatabase.get(appContext).dao()
     val settingsStore = SettingsStore(appContext)
     val collector = UsageCollector(appContext)
+    val health = HealthConnectManager(appContext)
 
     val settings: Flow<HelmSettings> = settingsStore.settings
 
@@ -42,6 +46,9 @@ class HelmRepository(context: Context) {
     suspend fun logsBetween(from: Long, to: Long) = dao.logsBetween(from, to)
     suspend fun addLog(entry: LogEntry) = dao.insertLog(entry)
     suspend fun deleteLog(id: Long) = dao.deleteLog(id)
+    suspend fun deleteSyncedLogs(note: String, from: Long, to: Long) = withContext(Dispatchers.IO) {
+        dao.deleteLogsByNote(note, from, to)
+    }
 
     // --- Limits & focus ---
     fun limits() = dao.limits()

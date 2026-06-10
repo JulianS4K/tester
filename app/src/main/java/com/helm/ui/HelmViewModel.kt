@@ -98,6 +98,18 @@ class HelmViewModel(app: Application) : AndroidViewModel(app) {
         onDone()
     }
 
+    // --- Health Connect ---
+    fun healthAvailability(): Int = repo.health.availability()
+    val healthPermissions: Set<String> get() = repo.health.permissions
+    fun healthPermissionContract() =
+        androidx.health.connect.client.PermissionController.createRequestPermissionResultContract()
+
+    fun syncHealth(onResult: (String) -> Unit) = viewModelScope.launch {
+        val msg = runCatching { repo.health.syncToday(repo) }
+            .getOrElse { "Health sync failed: ${it.message}" }
+        onResult(msg)
+    }
+
     fun importCsv(uri: android.net.Uri, onResult: (String) -> Unit) = viewModelScope.launch {
         val app = getApplication<Application>()
         val text = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {

@@ -2,6 +2,8 @@ package com.helm.ui.screens
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.health.connect.client.HealthConnectClient
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +43,12 @@ fun SettingsScreen(vm: HelmViewModel) {
     val settings by vm.settings.collectAsState()
     var pin by remember { mutableStateOf("") }
     var currencyInput by remember { mutableStateOf(settings.currency) }
+    var healthMsg by remember { mutableStateOf<String?>(null) }
+    val healthStatus = remember { vm.healthAvailability() }
+    val healthLauncher = rememberLauncherForActivityResult(vm.healthPermissionContract()) { granted ->
+        if (granted.containsAll(vm.healthPermissions)) vm.syncHealth { healthMsg = it }
+        else healthMsg = "Some health permissions were denied."
+    }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -91,6 +99,30 @@ fun SettingsScreen(vm: HelmViewModel) {
             Text("Optional: enables \"what you're using now\" and future hard-enforcement blocking.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
             OutlinedButton(onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }) { Text("Open accessibility settings") }
+        }
+
+        SectionCard("Health Connect") {
+            val statusText = when (healthStatus) {
+                HealthConnectClient.SDK_AVAILABLE -> "Available — connect to auto-sync steps, sleep, weight & workouts."
+                HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED -> "Update the Health Connect app to continue."
+                else -> "Not available on this device. You can still log health manually on the Track tab."
+            }
+            Text(statusText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    enabled = healthStatus == HealthConnectClient.SDK_AVAILABLE,
+                    onClick = { healthLauncher.launch(vm.healthPermissions) },
+                ) { Text("Connect & sync") }
+                OutlinedButton(
+                    enabled = healthStatus == HealthConnectClient.SDK_AVAILABLE,
+                    onClick = { vm.syncHealth { healthMsg = it } },
+                ) { Text("Sync now") }
+            }
+            healthMsg?.let {
+                Spacer(Modifier.height(6.dp))
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            }
         }
 
         SectionCard("About Helm") {
