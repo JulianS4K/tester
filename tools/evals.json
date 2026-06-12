@@ -1,0 +1,53 @@
+[
+  {
+    "id": "home_game_trap",
+    "why": "The next *game* for a team is often away, and playoff games are conditional. Agent must filter by venue/home and flag '(If Necessary)'.",
+    "question": "Report on the next New York Knicks home game.",
+    "truth_sql": "select name, venue_name, occurs_at_local from events where name ilike '%knicks%' and primary_performer_name ilike '%knicks%' and occurs_at_local::timestamp > now() order by occurs_at_local::timestamp limit 1",
+    "asserts": [
+      {"type": "contains_truth", "column": "venue_name", "level": "required"},
+      {"type": "conditional_contains", "when_column": "name", "when_substr": "If Necessary",
+       "values": ["necess", "condition", "tbd", "if the series"], "level": "required"}
+    ]
+  },
+  {
+    "id": "sibling_team_disambiguation",
+    "why": "'Inter Miami' matches both the first team and the reserve side (CF II). Agent must default to the first team.",
+    "question": "Report on the next Inter Miami game.",
+    "truth_sql": "select name, venue_name, occurs_at_local from events where primary_performer_name = 'Inter Miami CF' and occurs_at_local::timestamp > now() order by occurs_at_local::timestamp limit 1",
+    "asserts": [
+      {"type": "contains_truth", "column": "venue_name", "level": "required"},
+      {"type": "contains_any", "values": ["CF II", "reserve", "second team"], "level": "warn"}
+    ]
+  },
+  {
+    "id": "getin_numeric_accuracy",
+    "why": "The reported get-in price must match the database, not a hallucination.",
+    "setup_sql": "select e.id, e.name from events e join latest_event_metrics m on m.event_id = e.id where e.occurs_at_local::timestamp > now() and m.getin_price is not null and m.tickets_count > 100 order by e.popularity_score desc nulls last limit 1",
+    "question": "What is the current get-in price for {name} (TEvo event id {id})? Answer with the number.",
+    "truth_sql": "select getin_price from latest_event_metrics where event_id = {id}",
+    "asserts": [
+      {"type": "numeric_close", "column": "getin_price", "pct": 0.10, "level": "required"}
+    ]
+  },
+  {
+    "id": "owned_exposure_reported",
+    "why": "Report convention #4: a market report must include our owned inventory when we hold a meaningful position.",
+    "setup_sql": "select e.id, e.name from events e join latest_event_metrics m on m.event_id = e.id where m.owned_tickets_count > 50 and e.occurs_at_local::timestamp > now() order by m.owned_tickets_count desc limit 1",
+    "question": "Give me a market report for {name} (TEvo event id {id}).",
+    "truth_sql": "select owned_tickets_count from latest_event_metrics where event_id = {id}",
+    "asserts": [
+      {"type": "contains_any", "values": ["own", "we hold", "our inventory", "exposure"], "level": "required"}
+    ]
+  },
+  {
+    "id": "single_source_flagged",
+    "why": "Report convention #6: null SeatGeek columns mean single-source pricing — the answer should say so rather than present one marketplace as 'the market'.",
+    "setup_sql": "select d.event_id as id, e.name from event_listing_snapshot_daily d join events e on e.id = d.event_id where d.sg_all_median is null and d.evo_retail_median is not null and d.snapshot_date > current_date - 3 and e.occurs_at_local::timestamp > now() order by d.snapshot_date desc limit 1",
+    "question": "How is {name} (TEvo event id {id}) priced across marketplaces?",
+    "truth_sql": "select evo_retail_median from event_listing_snapshot_daily where event_id = {id} order by snapshot_date desc limit 1",
+    "asserts": [
+      {"type": "contains_any", "values": ["single-source", "single source", "no SeatGeek", "not available", "only one", "missing", "null"], "level": "warn"}
+    ]
+  }
+]

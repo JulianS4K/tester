@@ -1,0 +1,70 @@
+name: Schema drift check
+
+# Keeps docs/database/schema-reference.md in sync with the live database (limit #5).
+# Requires repo secret DATABASE_URL_READONLY = the data_reader connection string.
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Mondays 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_READONLY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip if secret not configured
+        id: gate
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL_READONLY secret not set — skipping (add it to enable drift checks)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        if: steps.gate.outputs.enabled == 'true'
+        run: pip install "psycopg[binary]>=3.1"
+
+      - name: Check for structural drift
+        if: steps.gate.outputs.enabled == 'true'
+        id: check
+        run: |
+          set +e
+          python tools/regen_schema_reference.py --check
+          code=$?
+          set -e
+          if [ "$code" = "2" ]; then echo "drift=true" >> "$GITHUB_OUTPUT";
+          elif [ "$code" = "0" ]; then echo "drift=false" >> "$GITHUB_OUTPUT";
+          else exit "$code"; fi
+
+      - name: Regenerate reference
+        if: steps.gate.outputs.enabled == 'true' && steps.check.outputs.drift == 'true'
+        run: python tools/regen_schema_reference.py
+
+      - name: Open PR with refreshed schema reference
+        if: steps.gate.outputs.enabled == 'true' && steps.check.outputs.drift == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: schema-refresh
+          title: "Refresh schema reference (live catalog drifted)"
+          commit-message: "Regenerate schema-reference.md from live catalog"
+          body: >
+            Automated weekly drift check found structural changes in the live database
+            (new/dropped tables or columns, key changes). This PR regenerates
+            `docs/database/schema-reference.md` so agents work from a current map.
+            Review the diff for anything that also needs a README/domain update.
+          draft: true
