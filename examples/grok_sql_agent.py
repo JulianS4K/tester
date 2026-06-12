@@ -59,6 +59,15 @@ TOOLS = [{
     },
 }]
 
+# Optional live-context tools (Wikipedia / Reddit / TSA flight trends).
+# If live_context_tools.py is present and `requests` is installed, the agent
+# gets them automatically; otherwise it runs SQL-only.
+try:
+    from live_context_tools import LIVE_TOOLS, DISPATCH as LIVE_DISPATCH
+    TOOLS = TOOLS + LIVE_TOOLS
+except ImportError:
+    LIVE_DISPATCH = {}
+
 # Defense in depth: the data_reader role is already SELECT-only at the database,
 # and we also open a read-only transaction below. This guard just fails fast on
 # obviously non-read queries so Grok gets a clear error instead of a DB rejection.
@@ -102,8 +111,13 @@ def ask(question: str) -> str:
         })
         for tc in msg.tool_calls:
             args = json.loads(tc.function.arguments or "{}")
-            result = run_sql(args.get("query", "")) if tc.function.name == "run_sql" else "{}"
-            print(f"  ↳ run_sql: {args.get('query','')[:120]}", file=sys.stderr)
+            if tc.function.name == "run_sql":
+                result = run_sql(args.get("query", ""))
+            elif tc.function.name in LIVE_DISPATCH:
+                result = LIVE_DISPATCH[tc.function.name](args)
+            else:
+                result = json.dumps({"error": f"unknown tool {tc.function.name}"})
+            print(f"  ↳ {tc.function.name}: {str(args)[:120]}", file=sys.stderr)
             messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
     return "(stopped after too many tool-call rounds)"
 
