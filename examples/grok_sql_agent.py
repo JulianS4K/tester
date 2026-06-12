@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 """
-Grok -> Terminal .5 database, read-only.
+Terminal .5 database -> read-only SQL agent (provider-agnostic).
 
-A minimal reference agent that lets Grok (xAI) answer questions about the data by
-writing and running read-only SQL. The pattern is model-agnostic: it's plain
-OpenAI-compatible function calling, so the same shape works for GPT, etc.
+A minimal reference agent that answers questions about the data by writing and
+running read-only SQL. It uses plain OpenAI-compatible function calling, so the
+SAME script drives Claude (Sonnet), Grok, Gemini, GPT, or a local model — you
+only change three env vars.
 
-  Grok decides what to query  ->  calls the run_sql tool  ->  we execute it against
-  the read-only Postgres role  ->  Grok interprets the rows and answers.
+  Model decides what to query  ->  calls run_sql  ->  we execute it against the
+  read-only Postgres role  ->  model interprets the rows and answers.
 
-Setup:
+Setup (default: Claude Sonnet via Anthropic's OpenAI-compatible endpoint):
     pip install "openai>=1.0" "psycopg[binary]>=3.1"
-    export XAI_API_KEY="xai-..."                       # from console.x.ai
+    export AGENT_API_KEY="sk-ant-..."     # provider key (see table below)
     export DATABASE_URL="postgresql://data_reader:PW@db.hzrizjeaxlqcxfrtczpq.supabase.co:5432/postgres?sslmode=require"
-    # optional: export XAI_MODEL="grok-4"
+
+Switch providers by setting AGENT_BASE_URL / AGENT_MODEL:
+    Claude  (default) https://api.anthropic.com/v1/                claude-sonnet-4-6
+    Grok              https://api.x.ai/v1                          grok-4
+    Gemini            https://generativelanguage.googleapis.com/v1beta/openai/   gemini-2.5-flash
+    Local (Ollama)    http://localhost:11434/v1                    qwen3:32b
 
 Run:
     python examples/grok_sql_agent.py "What are the 5 priciest upcoming events by get-in price?"
@@ -27,7 +33,11 @@ import pathlib
 from openai import OpenAI
 import psycopg
 
-XAI_MODEL = os.environ.get("XAI_MODEL", "grok-4")
+# Provider config — defaults to Claude Sonnet. XAI_* names kept for back-compat.
+BASE_URL = os.environ.get("AGENT_BASE_URL", "https://api.anthropic.com/v1/")
+MODEL = os.environ.get("AGENT_MODEL", os.environ.get("XAI_MODEL", "claude-sonnet-4-6"))
+API_KEY = (os.environ.get("AGENT_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
+           or os.environ.get("XAI_API_KEY") or "")
 DATABASE_URL = os.environ["DATABASE_URL"]
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
@@ -35,7 +45,7 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 # Tracks estimated spend in a local ledger and refuses to start/continue once the
 # monthly cap is hit. This is the graceful in-month stop; ALSO set the hard spend
 # limit in the provider console (workspace/org level) as the unbypassable backstop.
-MONTHLY_BUDGET_USD = float(os.environ.get("MONTHLY_BUDGET_USD", "25"))
+MONTHLY_BUDGET_USD = float(os.environ.get("MONTHLY_BUDGET_USD", "20"))
 MAX_COST_PER_QUESTION_USD = float(os.environ.get("MAX_COST_PER_QUESTION_USD", "0.50"))
 LEDGER = pathlib.Path(os.environ.get("BUDGET_LEDGER", str(REPO / ".budget_ledger.json")))
 
@@ -160,15 +170,15 @@ def run_sql(query: str) -> str:
 
 
 def ask(question: str) -> str:
-    client = OpenAI(api_key=os.environ["XAI_API_KEY"], base_url="https://api.x.ai/v1")
+    client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
     messages = [{"role": "system", "content": SYSTEM},
                 {"role": "user", "content": question}]
     question_cost = 0.0
     for _ in range(12):  # cap tool-call rounds
         budget_check(question_cost)  # hard-stop on monthly cap or runaway question
-        resp = client.chat.completions.create(model=XAI_MODEL, messages=messages, tools=TOOLS)
+        resp = client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS)
         if resp.usage:
-            question_cost += budget_add(resp.usage, XAI_MODEL)
+            question_cost += budget_add(resp.usage, MODEL)
         msg = resp.choices[0].message
         if not msg.tool_calls:
             return msg.content or ""
