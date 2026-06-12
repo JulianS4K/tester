@@ -57,7 +57,12 @@ For any number someone might act on (prices, exposure, supply), verify before re
    If they disagree by >10%, report the discrepancy instead of picking one silently.
 3. **Sanity bounds:** `getin_price <= retail_median <= retail_max`; counts non-negative;
    shares in [0,1]. A violated bound means your query is wrong — re-derive, don't report.
-4. **Show your work:** include the SQL behind headline numbers so a human can audit, and
+4. **Cross-source joins — verify the mapping itself.** Known live issues: ESPN links can point
+   at the wrong game of the same series (adjacent-day mismatches), and a few SeatGeek ids are
+   shared by two different events. When a conclusion rides on an xref join, check both sides
+   occur within ~6h of each other; if not, flag the mapping as suspect instead of reporting
+   blended numbers. (`tools/xref_quality.py` runs the full check suite.)
+5. **Show your work:** include the SQL behind headline numbers so a human can audit, and
    state confidence ("single snapshot", "single-source", "conditional event") explicitly.
 
 ## Live external context (if fetch/search tools are available)

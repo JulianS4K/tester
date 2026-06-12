@@ -119,6 +119,17 @@ Full per-table detail (every column, PK, FK, comment) is in
   Counts in the reference tell you what's actually populated.
 - **Views vs tables:** several `public` relations are **views** (e.g. `entity_*_map`,
   `event_lifecycle`, `event_velocity`, `latest_*`, `cross_source_*`). They're great shortcuts.
+- **Cross-source mappings can be wrong — verify before trusting a cross-source join.**
+  Known failure modes (live as of 2026-06-12, see `tools/xref_quality.py`): an ESPN link can
+  point at the **wrong game of the same series** (~370 adjacent-day mismatches, mostly MLB),
+  rescheduled games keep stale ESPN dates, and a few SeatGeek ids are shared by two different
+  events (e.g. a WNBA game and an NBA playoff placeholder at the same arena). When a
+  conclusion rides on a cross-source join, sanity-check that both sides occur at ~the same
+  time (`occurs_at_local::timestamptz` vs `game_at_utc` within ~6h) and say so if they don't.
+- **`ticketsdata_event_xref.event_id` is NOT `events.id`** — nearly all its rows fail to join
+  to `events`, so it appears to use a different id space (platform event ids). Don't join it
+  to the spine until the mapping is confirmed; prefer `ticketsdata_listings_snapshots`'s own
+  event linkage or the AQ hub.
 
 ---
 
