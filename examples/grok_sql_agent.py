@@ -31,6 +31,73 @@ XAI_MODEL = os.environ.get("XAI_MODEL", "grok-4")
 DATABASE_URL = os.environ["DATABASE_URL"]
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
+# --- Budget guard (client-side hard cap) --------------------------------------
+# Tracks estimated spend in a local ledger and refuses to start/continue once the
+# monthly cap is hit. This is the graceful in-month stop; ALSO set the hard spend
+# limit in the provider console (workspace/org level) as the unbypassable backstop.
+MONTHLY_BUDGET_USD = float(os.environ.get("MONTHLY_BUDGET_USD", "25"))
+MAX_COST_PER_QUESTION_USD = float(os.environ.get("MAX_COST_PER_QUESTION_USD", "0.50"))
+LEDGER = pathlib.Path(os.environ.get("BUDGET_LEDGER", str(REPO / ".budget_ledger.json")))
+
+# $ per 1M tokens (input, output). Prefix-matched against the model id.
+# Unknown models fall back to a deliberately expensive guess (over-counts = safe).
+PRICES = {
+    "claude-opus": (5.00, 25.00),
+    "claude-sonnet": (3.00, 15.00),
+    "claude-haiku": (1.00, 5.00),
+    "gemini-2.5-flash": (0.30, 2.50),
+    "gemini": (1.25, 10.00),
+    "grok": (3.00, 15.00),
+    "": (5.00, 25.00),  # fallback
+}
+
+
+def _price(model):
+    for prefix in sorted(PRICES, key=len, reverse=True):
+        if model.startswith(prefix):
+            return PRICES[prefix]
+    return PRICES[""]
+
+
+def _ledger_load():
+    import datetime
+    month = datetime.date.today().strftime("%Y-%m")
+    try:
+        data = json.loads(LEDGER.read_text())
+    except Exception:
+        data = {}
+    return data, month
+
+
+def budget_spent():
+    data, month = _ledger_load()
+    return float(data.get(month, 0.0))
+
+
+def budget_add(usage, model):
+    """Record cost from a response's usage object. Counts all prompt tokens at the
+    full input rate (ignores cache discounts) — over-counts, which is the safe side."""
+    pin, pout = _price(model)
+    cost = (usage.prompt_tokens / 1e6) * pin + (usage.completion_tokens / 1e6) * pout
+    data, month = _ledger_load()
+    data[month] = float(data.get(month, 0.0)) + cost
+    LEDGER.write_text(json.dumps(data))
+    return cost
+
+
+def budget_check(question_cost=0.0):
+    spent = budget_spent()
+    if spent >= MONTHLY_BUDGET_USD:
+        raise SystemExit(
+            f"BUDGET CAP: ${spent:.2f} of ${MONTHLY_BUDGET_USD:.2f} spent this month. "
+            f"Raise MONTHLY_BUDGET_USD or wait for the new month."
+        )
+    if question_cost >= MAX_COST_PER_QUESTION_USD:
+        raise RuntimeError(
+            f"Question aborted at ${question_cost:.2f} (MAX_COST_PER_QUESTION_USD="
+            f"${MAX_COST_PER_QUESTION_USD:.2f}) — likely a runaway exploration."
+        )
+
 # --- System prompt: the behavioral contract + the map -------------------------
 # AGENTS.md is the vendor-neutral contract; README.md is the narrative schema map.
 SYSTEM = (
@@ -96,8 +163,12 @@ def ask(question: str) -> str:
     client = OpenAI(api_key=os.environ["XAI_API_KEY"], base_url="https://api.x.ai/v1")
     messages = [{"role": "system", "content": SYSTEM},
                 {"role": "user", "content": question}]
+    question_cost = 0.0
     for _ in range(12):  # cap tool-call rounds
+        budget_check(question_cost)  # hard-stop on monthly cap or runaway question
         resp = client.chat.completions.create(model=XAI_MODEL, messages=messages, tools=TOOLS)
+        if resp.usage:
+            question_cost += budget_add(resp.usage, XAI_MODEL)
         msg = resp.choices[0].message
         if not msg.tool_calls:
             return msg.content or ""
