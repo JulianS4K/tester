@@ -62,8 +62,9 @@ This string works with any client: `psql`, `psycopg`/`asyncpg` (Python), `pg` (N
 ## 3. MCP option (Claude Desktop / Code / Cursor)
 
 Agents that speak MCP can use the **Supabase MCP server in read-only mode** instead of a raw
-connection — start it with the `--read-only` flag and a Personal Access Token. Example
-`mcp.json` entry:
+connection. A ready-to-use config already lives at the **repo root: [`.mcp.json`](../../.mcp.json)** —
+Claude Code (and Cursor) auto-discover it. It pulls the access token from an environment
+variable so no secret is committed:
 
 ```json
 {
@@ -75,14 +76,26 @@ connection — start it with the `--read-only` flag and a Personal Access Token.
         "--read-only",
         "--project-ref=hzrizjeaxlqcxfrtczpq"
       ],
-      "env": { "SUPABASE_ACCESS_TOKEN": "<a read-only-scoped PAT>" }
+      "env": { "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}" }
     }
   }
 }
 ```
 
-`--read-only` makes the MCP server execute SQL as a read-only Postgres user, so writes are
-rejected. For non-MCP agents (e.g. Grok via API), use the connection string from §2 instead.
+**To use it:** create a Supabase **Personal Access Token** (Account → Access Tokens), then
+export it before launching the client:
+
+```bash
+export SUPABASE_ACCESS_TOKEN="sbp_..."   # keep out of git; never commit
+```
+
+- `--read-only` makes the MCP server execute SQL as a read-only Postgres user, so writes are
+  rejected at the server.
+- **Cursor:** same JSON, in `.cursor/mcp.json` (already compatible — copy `.mcp.json` there).
+- **Claude Desktop:** same `mcpServers` block inside `claude_desktop_config.json`; expand the
+  token inline or via your shell env.
+- For **non-MCP agents** (e.g. Grok via API), skip MCP and use the read-only connection string
+  from §2 with a "run SQL" tool.
 
 ---
 
