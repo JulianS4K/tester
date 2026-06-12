@@ -14,6 +14,8 @@ or reviewing code.**
 | [`docs/database/README.md`](./docs/database/README.md) | **The map**: what the data is, the domain groups, the cross-source join model, gotchas, example queries. Start here. |
 | [`docs/database/schema-reference.md`](./docs/database/schema-reference.md) | Exhaustive auto-generated reference for all 207 tables (columns, types, keys, FKs, row counts). |
 | [`docs/database/access.md`](./docs/database/access.md) | How to set up **read-only** access (a database-enforced `data_reader` role) and connect. |
+| [`.mcp.json`](./.mcp.json) | Ready-to-use read-only Supabase MCP server for Claude Code / Cursor. |
+| [`examples/grok_sql_agent.py`](./examples/grok_sql_agent.py) | Runnable reference client plugging **Grok (xAI)** into the data via function calling. |
 
 ## How to give someone access
 
