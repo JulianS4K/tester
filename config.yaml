@@ -1,0 +1,53 @@
+# =============================================================================
+# Competitor tracking configuration
+# =============================================================================
+# Define your two products (referred to as "d1" and "d4") and the major
+# competitors you want to track for each. The example competitors below are
+# placeholders so the tool runs out of the box — REPLACE them with the real
+# names and websites for your market.
+#
+# Per-competitor fields:
+#   name        (required) display name + storage key
+#   website     (optional) homepage to watch for content changes
+#   aliases     (optional) alternate brand/product names, OR'd into news search
+#   news_query  (optional) full custom search string (overrides name + aliases)
+#   tags        (optional) free-form labels
+# =============================================================================
+
+settings:
+  lookback_days: 7        # only report news from the last N days
+  news_language: en
+  news_country: US
+  request_timeout: 15
+  sources:                # which collectors to run
+    - news
+    - website
+
+products:
+  d1:
+    name: "D1"            # <- rename to your actual D1 product
+    competitors:
+      - name: "Notion"
+        website: "https://www.notion.so"
+        aliases: ["Notion Labs"]
+        tags: ["productivity"]
+      - name: "Coda"
+        website: "https://coda.io"
+        tags: ["productivity"]
+      - name: "Airtable"
+        website: "https://www.airtable.com"
+        tags: ["database", "no-code"]
+
+  d4:
+    name: "D4"            # <- rename to your actual D4 product
+    competitors:
+      - name: "Linear"
+        website: "https://linear.app"
+        tags: ["issue-tracking"]
+      - name: "Jira"
+        website: "https://www.atlassian.com/software/jira"
+        aliases: ["Atlassian Jira"]
+        tags: ["issue-tracking", "enterprise"]
+      - name: "Asana"
+        website: "https://asana.com"
+        tags: ["project-management"]
