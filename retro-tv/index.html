@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retro TV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/crt.css" />
+</head>
+<body>
+  <div id="tv">
+    <!-- Tuned-in channel -->
+    <div id="screen"></div>
+
+    <!-- HUD -->
+    <div id="channel-badge"></div>
+    <div id="now-showing"></div>
+    <div id="hint"><b>OK</b> watch · <b>▲▼</b> channel · <b>G</b> guide</div>
+
+    <!-- TV Guide overlay -->
+    <div id="guide"></div>
+
+    <!-- CRT overlays -->
+    <canvas id="static" class="overlay"></canvas>
+    <div id="scanlines" class="overlay"></div>
+    <div id="rollbar" class="overlay"></div>
+    <div id="vignette" class="overlay"></div>
+    <div id="poweron"></div>
+  </div>
+
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>
