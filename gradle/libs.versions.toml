@@ -11,6 +11,14 @@ room = "2.6.1"
 workManager = "2.9.1"
 datastore = "1.1.1"
 healthConnect = "1.1.0-rc02"
+tvMaterial = "1.0.0"
+tvFoundation = "1.0.0-alpha12"
+retrofit = "2.11.0"
+okhttp = "4.12.0"
+moshi = "1.15.1"
+coil = "2.7.0"
+zxing = "3.5.3"
+coroutines = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,6 +40,21 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-health-connect = { group = "androidx.health.connect", name = "connect-client", version.ref = "healthConnect" }
+
+# Android TV (Compose for TV)
+androidx-tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tvMaterial" }
+androidx-tv-foundation = { group = "androidx.tv", name = "tv-foundation", version.ref = "tvFoundation" }
+
+# Networking / JSON / images (Trakt client)
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
+moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

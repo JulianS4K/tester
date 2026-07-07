@@ -1,3 +1,7 @@
+> ℹ️ **This repo now contains two apps.** The `:app` module below is **Helm**
+> (personal phone-control). There is also a `:tv` module — **Trakt TV**, an
+> Android TV / Fire TV client for the Trakt API. See [`tv/README.md`](tv/README.md).
+
 # ⚓ Helm — your personal control center
 
 Take the helm of your phone **and** your day. Helm is a private, on-device Android
