@@ -1,0 +1,24 @@
+# systemd unit to run the Trakt interface server on boot.
+# Install:
+#   sudo cp scripts/trakt-tv.service /etc/systemd/system/trakt-tv.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now trakt-tv
+# Edit User/WorkingDirectory to match where you cloned the repo.
+[Unit]
+Description=Trakt TV interface (Raspberry Pi)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/tester/pi
+ExecStart=/usr/bin/node server/index.js
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+# Credentials are read from the .env file in WorkingDirectory, or set them here:
+# Environment=TRAKT_CLIENT_ID=xxxx
+# Environment=TRAKT_CLIENT_SECRET=xxxx
+
+[Install]
+WantedBy=multi-user.target

@@ -1,6 +1,9 @@
-> ℹ️ **This repo now contains two apps.** The `:app` module below is **Helm**
-> (personal phone-control). There is also a `:tv` module — **Trakt TV**, an
-> Android TV / Fire TV client for the Trakt API. See [`tv/README.md`](tv/README.md).
+> ℹ️ **This repo now contains multiple apps.** The `:app` module below is **Helm**
+> (personal phone-control). There is also a Trakt client for the living room, in two
+> deployments:
+> - [`pi/`](pi/README.md) — **Trakt TV for Raspberry Pi**: a Node server + web UI you
+>   host on a Pi and show fullscreen on the TV via Chromium kiosk. *(current target)*
+> - [`tv/`](tv/README.md) — **Trakt TV** `:tv` Android TV / Fire TV client (Compose for TV).
 
 # ⚓ Helm — your personal control center
 
