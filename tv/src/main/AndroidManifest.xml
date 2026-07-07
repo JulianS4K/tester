@@ -66,14 +66,24 @@
             android:banner="@drawable/tv_banner"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
             android:exported="true"
+            android:launchMode="singleTask"
             android:screenOrientation="landscape"
+            android:stateNotNeeded="true"
             android:theme="@style/Theme.TraktTv">
+            <!-- Normal launcher entry (app grid + non-TV devices). -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <!-- Shows up in the Android TV / Fire TV home launcher. -->
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-                <!-- Also launchable on non-TV devices. -->
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Home-screen launcher: lets the user set this as the TV's default
+                 Home app (Google TV / Android TV: Settings → Apps → Default apps →
+                 Home app, or the picker shown when pressing the Home button).
+                 Note: Fire TV locks its launcher and won't offer this. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

@@ -56,6 +56,19 @@ object WatchLauncher {
         }
     }
 
+    /** Cold-launch a streaming app by package (used by the launcher's Apps row). */
+    fun launchApp(context: Context, packageName: String): Boolean {
+        val pm = context.packageManager
+        val intent = pm.getLeanbackLaunchIntentForPackage(packageName)
+            ?: pm.getLaunchIntentForPackage(packageName)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return if (intent != null) {
+            runCatching { context.startActivity(intent); true }.getOrDefault(false)
+        } else {
+            false
+        }
+    }
+
     fun canWebSearch(context: Context): Boolean =
         webSearchIntent("x").resolveActivity(context.packageManager) != null
 

@@ -1,19 +1,38 @@
-# 📺 Trakt TV — Android TV / Fire TV client
+# 📺 Trakt TV — a custom Android TV / Fire TV home screen
 
 A 10-foot [Trakt](https://trakt.tv) client for **Fire TV Stick** and **Google TV /
-Android TV**, built with **Jetpack Compose for TV**. Browse what's trending,
-search the catalog, open rich detail pages, and manage your Trakt **watchlist**
-and **watch history** — all driven by the [Trakt API v2](https://api.trakt.tv).
+Android TV**, built with **Jetpack Compose for TV** — designed to work as your
+**custom TV home screen (launcher)**. It surfaces **what you want to watch**
+(your watchlist + trending), shows a row of the **streaming apps installed on your
+TV**, and **opens them to watch** — all driven by the [Trakt API v2](https://api.trakt.tv).
 
 This is the `:tv` Gradle module in this repository (separate from the `:app`
 "Helm" phone app).
+
+## Use it as your TV home screen
+
+The app declares the Android **HOME** launcher intent, so on **Google TV /
+Android TV** you can make it the default Home app:
+
+- **Settings → Apps → Default apps → Home app → Trakt TV**, or press the **Home**
+  button and pick Trakt TV when the system asks which launcher to use.
+- To revert, choose the original launcher in the same setting.
+
+When set as Home, the **Apps row** (top of the Home screen) launches your installed
+streaming apps, and **Back on the Home screen does nothing** (it won't drop you to a
+blank screen), as a launcher should.
+
+> ⚠️ **Fire TV** locks its launcher — Amazon doesn't let a third-party app replace
+> the Fire TV home screen. There the app still installs and runs as a normal app
+> (and appears on the Fire TV home row); the launcher/Home-app behavior is a
+> Google TV / Android TV feature.
 
 ## Features
 
 | Area | Details |
 |---|---|
 | 🔐 **Sign in** | Trakt **device OAuth flow** — no keyboard needed. Shows a `user_code` + `verification_url` and a **QR code**; you authorize on your phone while the TV polls for the token. Tokens are stored in DataStore and **auto-refreshed** on expiry. |
-| 🏠 **Home** | Horizontal, D-pad-navigable rows: Trending / Popular Shows & Movies + Anticipated. |
+| 🏠 **Home (launcher)** | Top **Apps row** launches the streaming apps installed on the TV; then **Your Watchlist** (when signed in) and Trending / Popular / Anticipated rows. Works as the device's default Home app. |
 | 🔎 **Search** | Text query across movies & shows (debounced), poster grid of results. |
 | 📄 **Detail** | Backdrop + logo, overview, rating, genres, runtime, certification, network, and a "More like this" row. |
 | ➕ **Sync actions** | Add to **Watchlist** and **Mark as Watched** (writes to `/sync/watchlist` and `/sync/history`). Prompts sign-in when needed. |

@@ -46,7 +46,9 @@ fun TraktApp(container: AppContainer) {
     }
     fun pop() { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }
 
-    BackHandler(enabled = backStack.size > 1) { pop() }
+    // Always consume Back: pop within the app, and at the Home root do nothing
+    // (a Home launcher must never "back out" to a blank screen).
+    BackHandler(enabled = true) { if (backStack.size > 1) pop() }
 
     val openItem: (MediaItem) -> Unit = { item ->
         push(Destination.Detail(item.type, item.traktId.toString(), item.title))
