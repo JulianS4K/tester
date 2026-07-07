@@ -17,6 +17,7 @@ This is the `:tv` Gradle module in this repository (separate from the `:app`
 | 🔎 **Search** | Text query across movies & shows (debounced), poster grid of results. |
 | 📄 **Detail** | Backdrop + logo, overview, rating, genres, runtime, certification, network, and a "More like this" row. |
 | ➕ **Sync actions** | Add to **Watchlist** and **Mark as Watched** (writes to `/sync/watchlist` and `/sync/history`). Prompts sign-in when needed. |
+| ▶️ **Ways to watch** | Trakt has no streaming links, so the detail page **bridges to the device's apps**: a **"Search on this TV"** action (Google TV → native ways-to-watch, Fire TV → universal search) plus buttons that **open the streaming apps installed on the device** (Netflix, Prime, Disney+, Max, Hulu, Apple TV, Paramount+, Peacock, YouTube), deep-linking into the title search where the provider supports it. Web links (**Trakt / IMDb / TMDB**, built from the `ids`) show when a browser is present. |
 | 📚 **Library** | Your Watchlist and History (OAuth), as poster grids. |
 
 ## Architecture
@@ -37,6 +38,8 @@ tv/src/main/java/com/trakt/tv/
     TokenStore.kt           DataStore-backed token persistence + in-memory cache
     TraktRepository.kt      Main-safe entry point returning MediaItem
   auth/AuthManager.kt       Device-code flow: generate code, poll for token
+  watch/StreamingProvider.kt  Registry of TV streaming apps (Fire TV + Google TV pkgs)
+  watch/WatchLauncher.kt     Launch installed apps / TV search / web links ("Ways to watch")
   util/QrCodes.kt           ZXing QR bitmap for the activation URL
   ui/
     theme/Theme.kt          tv-material3 dark color scheme
@@ -90,4 +93,12 @@ installs on phones/emulators for quick testing.
   default disk/memory cache satisfies this.
 - The access token is valid for a limited window; `TokenAuthenticator` swaps in a
   fresh one on a 401 and replays the request. A failed refresh clears the session.
+- **"Ways to watch" is a best-effort bridge.** Trakt returns no streaming/entitlement
+  data, so the app can't guarantee a title is on a given service or deep-link to the
+  exact episode. It reliably **opens installed apps** and **fires the TV's global
+  search** (which surfaces native "ways to watch" on Google TV); per-provider title
+  deep-links are used where a public one exists (Netflix, Disney+, YouTube). Package
+  visibility for detection is declared in the manifest `<queries>` — add a provider's
+  package there and to `watch/StreamingProvider.kt` to support more apps. For exact
+  per-service availability, a future option is TMDB "watch providers" (needs a TMDB key).
 - This is an unofficial client; "Trakt" is a trademark of its owners.

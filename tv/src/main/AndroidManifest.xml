@@ -15,6 +15,41 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
+    <!-- Package visibility (Android 11+): so we can detect installed streaming
+         apps and resolve web-search / web-view intents for "Ways to watch". -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.WEB_SEARCH" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+        </intent>
+
+        <package android:name="com.netflix.ninja" />
+        <package android:name="com.netflix.mediaclient" />
+        <package android:name="com.amazon.avod" />
+        <package android:name="com.amazon.amazonvideo.livingroom" />
+        <package android:name="com.amazon.avod.thirdpartyclient" />
+        <package android:name="com.disney.disneyplus" />
+        <package android:name="com.wbd.stream" />
+        <package android:name="com.hbo.hbonow" />
+        <package android:name="com.hulu.livingroomplus" />
+        <package android:name="com.hulu.plus" />
+        <package android:name="com.apple.atve.androidtv.appletv" />
+        <package android:name="com.apple.atve.amazon.appletv" />
+        <package android:name="com.cbs.ott" />
+        <package android:name="com.peacocktv.peacockandroid" />
+        <package android:name="com.google.android.youtube.tv" />
+        <package android:name="com.amazon.firetv.youtube" />
+        <package android:name="com.google.android.youtube" />
+    </queries>
+
     <application
         android:name=".TraktTvApp"
         android:allowBackup="true"

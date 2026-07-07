@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalTvMaterial3Api::class)
+@file:OptIn(ExperimentalTvMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.trakt.tv.ui.detail
 
@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,16 +18,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -49,6 +55,8 @@ import com.trakt.tv.ui.components.LoadingView
 import com.trakt.tv.ui.components.MediaRow
 import com.trakt.tv.ui.components.MessageView
 import com.trakt.tv.ui.components.RatingBadge
+import com.trakt.tv.watch.WatchLauncher
+import com.trakt.tv.watch.WatchLinks
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -196,6 +204,14 @@ private fun DetailContent(
                         )
                     }
                     Spacer(Modifier.height(24.dp))
+                    WatchSection(item)
+                    Spacer(Modifier.height(24.dp))
+                    Text(
+                        "Track",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         Button(onClick = onAddWatchlist) {
                             Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -229,6 +245,63 @@ private fun DetailContent(
                 item { Spacer(Modifier.height(40.dp)) }
                 item {
                     MediaRow(title = "More like this", items = ui.related, onOpen = onOpen)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WatchSection(item: MediaItem) {
+    val context = LocalContext.current
+    val installed = remember(item.traktId) { WatchLauncher.installedProviders(context) }
+    val canSearch = remember { WatchLauncher.canWebSearch(context) }
+    val canWeb = remember { WatchLauncher.canOpenUrls(context) }
+
+    val webLinks = buildList {
+        add("Trakt" to WatchLinks.traktUrl(item))
+        WatchLinks.imdbUrl(item)?.let { add("IMDb" to it) }
+        WatchLinks.tmdbUrl(item)?.let { add("TMDB" to it) }
+    }
+
+    Text(
+        "Ways to watch",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (canSearch) {
+            Button(onClick = { WatchLauncher.webSearch(context, item.title) }) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Search on this TV")
+            }
+        }
+        installed.forEach { entry ->
+            Button(onClick = { WatchLauncher.launch(context, entry, item.title) }) {
+                Text(entry.provider.name)
+            }
+        }
+    }
+
+    if (installed.isEmpty() && !canSearch) {
+        Text(
+            "No streaming apps detected on this device.",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+    }
+
+    if (canWeb && webLinks.isNotEmpty()) {
+        Spacer(Modifier.height(12.dp))
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            webLinks.forEach { (label, url) ->
+                Button(onClick = { WatchLauncher.openUrl(context, url) }) {
+                    Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(label)
                 }
             }
         }
