@@ -14,8 +14,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -47,7 +50,10 @@ fun NavRail(
     val items = listOf(
         RailItem("Home", Icons.Filled.Home, Destination.Home),
         RailItem("Search", Icons.Filled.Search, Destination.Search),
+        RailItem("Browse", Icons.Filled.Explore, Destination.Browse),
+        RailItem("Lists", Icons.Filled.ListAlt, Destination.Lists),
         RailItem("Library", Icons.Filled.Bookmarks, Destination.Library),
+        RailItem("Stats", Icons.Filled.BarChart, Destination.Stats),
         RailItem("Settings", Icons.Filled.Settings, Destination.Settings),
     )
 

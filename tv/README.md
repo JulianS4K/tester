@@ -34,8 +34,10 @@ blank screen), as a launcher should.
 | 🔐 **Sign in** | Trakt **device OAuth flow** — no keyboard needed. Shows a `user_code` + `verification_url` and a **QR code**; you authorize on your phone while the TV polls for the token. Tokens are stored in DataStore and **auto-refreshed** on expiry. |
 | 🏠 **Home (launcher)** | Top **Apps row** launches the streaming apps installed on the TV; then **Your Watchlist** (when signed in) and Trending / Popular / Anticipated rows. Works as the device's default Home app. |
 | 🔎 **Search** | Text query across movies & shows (debounced), poster grid of results. |
-| 📄 **Detail** | Backdrop + logo, overview, rating, genres, runtime, certification, network, and a "More like this" row. |
-| ➕ **Sync actions** | Add to **Watchlist** and **Mark as Watched** (writes to `/sync/watchlist` and `/sync/history`). Prompts sign-in when needed. |
+| 📄 **Detail** | Backdrop, overview, rating, genres, runtime, **Up Next** episode, **Seasons → Episodes** (per-episode mark-watched), **Cast** (→ person page), and "More like this". |
+| ➕ **Track actions** | Add to **Watchlist**, **Mark Watched**, **Add to Collection**, and **Rate 1–10** (writes to `/sync/*`). Prompts sign-in when needed. |
+| 🧭 **Browse / Lists / Stats** | Browse by **genre**, explore **Trending Lists** (→ list contents), and view your **Trakt stats**. |
+| 👤 **People** | Cast → person page with their movies & shows. |
 | ▶️ **Ways to watch** | Trakt has no streaming links, so the detail page **bridges to the device's apps**: a **"Search on this TV"** action (Google TV → native ways-to-watch, Fire TV → universal search) plus buttons that **open the streaming apps installed on the device** (Netflix, Prime, Disney+, Max, Hulu, Apple TV, Paramount+, Peacock, YouTube), deep-linking into the title search where the provider supports it. Web links (**Trakt / IMDb / TMDB**, built from the `ids`) show when a browser is present. |
 | 📚 **Library** | Your Watchlist and History (OAuth), as poster grids. |
 

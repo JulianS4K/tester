@@ -68,20 +68,35 @@ class HomeViewModel(private val repo: TraktRepository) : ViewModel() {
         viewModelScope.launch {
             _state.value = UiState.Loading
             val rows = coroutineScope {
-                // "Your Watchlist" is personalized; it returns empty when signed out.
+                // Personalized rows (return empty when signed out).
+                val continueWatching = async { safe { repo.continueWatching() } }
                 val watchlist = async { safe { repo.watchlist() } }
+                val upcoming = async { safe { repo.upcoming() } }
+                val recShows = async { safe { repo.recommendedShows() } }
+                val recMovies = async { safe { repo.recommendedMovies() } }
+                // Public discovery.
                 val trendingShows = async { safe { repo.trendingShows() } }
                 val trendingMovies = async { safe { repo.trendingMovies() } }
+                val mostWatched = async { safe { repo.mostWatchedShows() } }
                 val popularShows = async { safe { repo.popularShows() } }
                 val popularMovies = async { safe { repo.popularMovies() } }
-                val anticipated = async { safe { repo.anticipatedMovies() } }
+                val boxOffice = async { safe { repo.boxOffice() } }
+                val anticipatedShows = async { safe { repo.anticipatedShows() } }
+                val anticipatedMovies = async { safe { repo.anticipatedMovies() } }
                 listOf(
+                    HomeRow("Continue Watching", continueWatching.await()),
                     HomeRow("Your Watchlist", watchlist.await()),
+                    HomeRow("Coming Soon", upcoming.await()),
+                    HomeRow("Recommended Shows", recShows.await()),
+                    HomeRow("Recommended Movies", recMovies.await()),
                     HomeRow("Trending Shows", trendingShows.await()),
                     HomeRow("Trending Movies", trendingMovies.await()),
+                    HomeRow("Most Watched This Week", mostWatched.await()),
                     HomeRow("Popular Shows", popularShows.await()),
                     HomeRow("Popular Movies", popularMovies.await()),
-                    HomeRow("Anticipated Movies", anticipated.await()),
+                    HomeRow("Box Office", boxOffice.await()),
+                    HomeRow("Anticipated Shows", anticipatedShows.await()),
+                    HomeRow("Anticipated Movies", anticipatedMovies.await()),
                 ).filter { it.items.isNotEmpty() }
             }
             _state.value =

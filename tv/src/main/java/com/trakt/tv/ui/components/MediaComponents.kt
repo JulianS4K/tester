@@ -135,6 +135,75 @@ fun MediaRow(
     }
 }
 
+/** A circular headshot tile for a cast member. */
+@Composable
+fun CastCard(item: com.trakt.tv.data.model.CastItem, onClick: (com.trakt.tv.data.model.CastItem) -> Unit) {
+    Card(
+        onClick = { onClick(item) },
+        modifier = Modifier.width(120.dp),
+        border = CardDefaults.border(focusedBorder = Border(BorderStroke(3.dp, MaterialTheme.colorScheme.primary))),
+        scale = CardDefaults.scale(focusedScale = 1.08f),
+    ) {
+        Box(Modifier.width(120.dp).aspectRatio(1f), contentAlignment = Alignment.Center) {
+            if (item.headshotUrl != null) {
+                AsyncImage(
+                    model = item.headshotUrl,
+                    contentDescription = item.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                Text(
+                    text = item.name.take(1),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Text(
+            text = item.name,
+            style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 6.dp).padding(top = 6.dp),
+        )
+        if (!item.character.isNullOrBlank()) {
+            Text(
+                text = item.character,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 6.dp).padding(bottom = 8.dp),
+            )
+        }
+    }
+}
+
+/** A titled horizontal row of cast members. */
+@Composable
+fun CastRow(
+    title: String,
+    cast: List<com.trakt.tv.data.model.CastItem>,
+    onOpen: (com.trakt.tv.data.model.CastItem) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (cast.isEmpty()) return
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(start = 48.dp, bottom = 12.dp),
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 48.dp),
+        ) {
+            items(cast, key = { it.personId }) { CastCard(it, onOpen) }
+        }
+    }
+}
+
 /** Small "★ 8.4" rating chip. */
 @Composable
 fun RatingBadge(rating: Double?, modifier: Modifier = Modifier) {

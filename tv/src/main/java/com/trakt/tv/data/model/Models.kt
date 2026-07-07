@@ -179,15 +179,20 @@ data class MovieRef(val ids: Ids)
 @JsonClass(generateAdapter = true)
 data class ShowRef(val ids: Ids)
 
-/** Shared body for /sync/history, /sync/watchlist (add + remove). */
+@JsonClass(generateAdapter = true)
+data class EpisodeRef(val ids: Ids)
+
+/** Shared body for /sync/history, /sync/watchlist, /sync/collection. */
 @JsonClass(generateAdapter = true)
 data class SyncItems(
     val movies: List<MovieRef>? = null,
     val shows: List<ShowRef>? = null,
+    val episodes: List<EpisodeRef>? = null,
 ) {
     companion object {
         fun movie(ids: Ids) = SyncItems(movies = listOf(MovieRef(ids)))
         fun show(ids: Ids) = SyncItems(shows = listOf(ShowRef(ids)))
+        fun episode(ids: Ids) = SyncItems(episodes = listOf(EpisodeRef(ids)))
     }
 }
 

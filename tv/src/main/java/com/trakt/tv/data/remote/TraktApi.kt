@@ -152,4 +152,155 @@ interface TraktApi {
 
     @GET("users/settings")
     suspend fun userSettings(): UserSettings
+
+    // ---- Continue watching / progress (OAuth) ----
+
+    @GET("sync/playback")
+    suspend fun playback(
+        @Query("extended") extended: String = "full,images",
+    ): List<com.trakt.tv.data.model.PlaybackItem>
+
+    @GET("shows/{id}/progress/watched")
+    suspend fun watchedProgress(
+        @Path("id") id: String,
+    ): com.trakt.tv.data.model.WatchedProgress
+
+    // ---- Recommendations (OAuth) ----
+
+    @GET("recommendations/movies")
+    suspend fun recommendedMovies(
+        @Query("limit") limit: Int = 24,
+        @Query("extended") extended: String = "full,images",
+    ): List<Movie>
+
+    @GET("recommendations/shows")
+    suspend fun recommendedShows(
+        @Query("limit") limit: Int = 24,
+        @Query("extended") extended: String = "full,images",
+    ): List<Show>
+
+    // ---- More discover ----
+
+    @GET("movies/boxoffice")
+    suspend fun boxOffice(
+        @Query("extended") extended: String = "full,images",
+    ): List<TrendingMovie>
+
+    @GET("shows/watched/{period}")
+    suspend fun mostWatchedShows(
+        @Path("period") period: String = "weekly",
+        @Query("limit") limit: Int = 24,
+        @Query("extended") extended: String = "full,images",
+    ): List<com.trakt.tv.data.model.WatchedShowItem>
+
+    // ---- Calendar (OAuth) ----
+
+    @GET("calendars/my/shows/{start_date}/{days}")
+    suspend fun myShows(
+        @Path("start_date") startDate: String,
+        @Path("days") days: Int,
+        @Query("extended") extended: String = "full,images",
+    ): List<com.trakt.tv.data.model.CalendarShow>
+
+    // ---- Seasons & episodes ----
+
+    @GET("shows/{id}/seasons")
+    suspend fun seasons(
+        @Path("id") id: String,
+        @Query("extended") extended: String = "full,images",
+    ): List<com.trakt.tv.data.model.Season>
+
+    @GET("shows/{id}/seasons/{season}")
+    suspend fun seasonEpisodes(
+        @Path("id") id: String,
+        @Path("season") season: Int,
+        @Query("extended") extended: String = "full,images",
+    ): List<Episode>
+
+    // ---- People / credits ----
+
+    @GET("shows/{id}/people")
+    suspend fun showPeople(
+        @Path("id") id: String,
+        @Query("extended") extended: String = "full,images",
+    ): com.trakt.tv.data.model.Credits
+
+    @GET("movies/{id}/people")
+    suspend fun moviePeople(
+        @Path("id") id: String,
+        @Query("extended") extended: String = "full,images",
+    ): com.trakt.tv.data.model.Credits
+
+    @GET("people/{id}")
+    suspend fun personSummary(
+        @Path("id") id: String,
+        @Query("extended") extended: String = "full,images",
+    ): com.trakt.tv.data.model.Person
+
+    @GET("people/{id}/movies")
+    suspend fun personMovies(
+        @Path("id") id: String,
+        @Query("extended") extended: String = "full,images",
+    ): com.trakt.tv.data.model.Credits
+
+    @GET("people/{id}/shows")
+    suspend fun personShows(
+        @Path("id") id: String,
+        @Query("extended") extended: String = "full,images",
+    ): com.trakt.tv.data.model.Credits
+
+    // ---- Ratings & collection (OAuth) ----
+
+    @POST("sync/ratings")
+    suspend fun addRatings(@Body body: com.trakt.tv.data.model.SyncRatings): Response<Unit>
+
+    @POST("sync/collection")
+    suspend fun addToCollection(@Body body: SyncItems): Response<Unit>
+
+    @POST("sync/collection/remove")
+    suspend fun removeFromCollection(@Body body: SyncItems): Response<Unit>
+
+    // ---- Browse by genre ----
+
+    @GET("genres/{type}")
+    suspend fun genres(
+        @Path("type") type: String,
+    ): List<com.trakt.tv.data.model.Genre>
+
+    @GET("shows/popular")
+    suspend fun showsByGenre(
+        @Query("genres") genres: String,
+        @Query("limit") limit: Int = 40,
+        @Query("extended") extended: String = "full,images",
+    ): List<Show>
+
+    @GET("movies/popular")
+    suspend fun moviesByGenre(
+        @Query("genres") genres: String,
+        @Query("limit") limit: Int = 40,
+        @Query("extended") extended: String = "full,images",
+    ): List<Movie>
+
+    // ---- Lists ----
+
+    @GET("lists/trending")
+    suspend fun trendingLists(
+        @Query("limit") limit: Int = 30,
+    ): List<com.trakt.tv.data.model.TrendingList>
+
+    @GET("lists/popular")
+    suspend fun popularLists(
+        @Query("limit") limit: Int = 30,
+    ): List<com.trakt.tv.data.model.TrendingList>
+
+    @GET("lists/{id}/items/movie,show")
+    suspend fun listItems(
+        @Path("id") id: String,
+        @Query("extended") extended: String = "full,images",
+    ): List<com.trakt.tv.data.model.ListItemWrapper>
+
+    // ---- Stats ----
+
+    @GET("users/me/stats")
+    suspend fun userStats(): com.trakt.tv.data.model.UserStats
 }

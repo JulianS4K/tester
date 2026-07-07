@@ -80,6 +80,14 @@ data class MediaItem(
     }
 }
 
+/** A cast/crew member for the detail page's people row. */
+data class CastItem(
+    val personId: Long,
+    val name: String,
+    val character: String?,
+    val headshotUrl: String?,
+)
+
 /** Image URL helpers — Trakt returns protocol-less WebP URLs; prepend https://. */
 object ImageUrls {
     fun pick(urls: List<String>?): String? =

@@ -47,11 +47,15 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.trakt.tv.data.TraktRepository
+import com.trakt.tv.data.model.CastItem
+import com.trakt.tv.data.model.Episode
 import com.trakt.tv.data.model.MediaItem
 import com.trakt.tv.data.model.MediaType
+import com.trakt.tv.data.model.Season
 import com.trakt.tv.ui.UiState
 import com.trakt.tv.ui.appContainer
 import com.trakt.tv.ui.components.LoadingView
+import com.trakt.tv.ui.components.CastRow
 import com.trakt.tv.ui.components.MediaRow
 import com.trakt.tv.ui.components.MessageView
 import com.trakt.tv.ui.components.RatingBadge
@@ -66,7 +70,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class DetailUi(val item: MediaItem, val related: List<MediaItem>)
+data class DetailUi(
+    val item: MediaItem,
+    val related: List<MediaItem>,
+    val cast: List<CastItem> = emptyList(),
+    val seasons: List<Season> = emptyList(),
+    val upNext: Episode? = null,
+)
 
 class DetailViewModel(
     private val repo: TraktRepository,
@@ -92,7 +102,14 @@ class DetailViewModel(
                 coroutineScope {
                     val detail = async { repo.detail(type, id) }
                     val related = async { runCatching { repo.related(type, id) }.getOrDefault(emptyList()) }
-                    DetailUi(detail.await(), related.await())
+                    val cast = async { runCatching { repo.credits(type, id) }.getOrDefault(emptyList()) }
+                    val seasons = async {
+                        if (type == MediaType.SHOW) runCatching { repo.seasons(id) }.getOrDefault(emptyList()) else emptyList()
+                    }
+                    val progress = async {
+                        if (type == MediaType.SHOW) repo.watchedProgress(id)?.nextEpisode else null
+                    }
+                    DetailUi(detail.await(), related.await(), cast.await(), seasons.await(), progress.await())
                 }
             }.fold(
                 onSuccess = { UiState.Success(it) },
@@ -103,6 +120,8 @@ class DetailViewModel(
 
     fun addToWatchlist() = act("Added to watchlist", "Couldn't add to watchlist") { repo.addToWatchlist(it) }
     fun markWatched() = act("Marked as watched", "Couldn't mark as watched") { repo.markWatched(it) }
+    fun addToCollection() = act("Added to collection", "Couldn't add to collection") { repo.addToCollection(it) }
+    fun rate(rating: Int) = act("Rated $rating/10", "Couldn't rate") { repo.rate(it, rating) }
 
     private fun act(ok: String, fail: String, action: suspend (MediaItem) -> Boolean) {
         val item = (state.value as? UiState.Success)?.data?.item ?: return
@@ -126,6 +145,8 @@ fun DetailScreen(
     type: MediaType,
     id: String,
     onOpen: (MediaItem) -> Unit,
+    onPerson: (CastItem) -> Unit,
+    onSeason: (Int) -> Unit,
     onRequireSignIn: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: DetailViewModel = viewModel(
@@ -146,7 +167,11 @@ fun DetailScreen(
             actionMessage = message,
             onAddWatchlist = { if (signedIn) viewModel.addToWatchlist() else onRequireSignIn() },
             onMarkWatched = { if (signedIn) viewModel.markWatched() else onRequireSignIn() },
+            onAddCollection = { if (signedIn) viewModel.addToCollection() else onRequireSignIn() },
+            onRate = { rating -> if (signedIn) viewModel.rate(rating) else onRequireSignIn() },
             onOpen = onOpen,
+            onPerson = onPerson,
+            onSeason = onSeason,
             modifier = modifier,
         )
     }
@@ -159,7 +184,11 @@ private fun DetailContent(
     actionMessage: String?,
     onAddWatchlist: () -> Unit,
     onMarkWatched: () -> Unit,
+    onAddCollection: () -> Unit,
+    onRate: (Int) -> Unit,
     onOpen: (MediaItem) -> Unit,
+    onPerson: (CastItem) -> Unit,
+    onSeason: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val item = ui.item
@@ -194,6 +223,14 @@ private fun DetailContent(
                     )
                     Spacer(Modifier.height(12.dp))
                     MetaRow(item)
+                    if (ui.upNext != null) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "Up next: " + episodeLabel(ui.upNext),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                     if (!item.overview.isNullOrBlank()) {
                         Spacer(Modifier.height(16.dp))
                         Text(
@@ -212,7 +249,7 @@ private fun DetailContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Button(onClick = onAddWatchlist) {
                             Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp))
@@ -222,6 +259,23 @@ private fun DetailContent(
                             Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp))
                             Text("Mark Watched")
+                        }
+                        Button(onClick = onAddCollection) {
+                            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Collection")
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "Rate",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        for (n in 1..10) {
+                            Button(onClick = { onRate(n) }) { Text(n.toString()) }
                         }
                     }
                     if (actionMessage != null) {
@@ -241,10 +295,45 @@ private fun DetailContent(
                     }
                 }
             }
+            if (ui.seasons.isNotEmpty()) {
+                item { Spacer(Modifier.height(36.dp)) }
+                item { SeasonsRow(ui.seasons, onSeason) }
+            }
+            if (ui.cast.isNotEmpty()) {
+                item { Spacer(Modifier.height(36.dp)) }
+                item { CastRow(title = "Cast", cast = ui.cast, onOpen = onPerson) }
+            }
             if (ui.related.isNotEmpty()) {
-                item { Spacer(Modifier.height(40.dp)) }
+                item { Spacer(Modifier.height(36.dp)) }
                 item {
                     MediaRow(title = "More like this", items = ui.related, onOpen = onOpen)
+                }
+            }
+        }
+    }
+}
+
+/** Episode label like "S2E5 · The Fly". */
+private fun episodeLabel(ep: Episode): String {
+    val code = "S${ep.season ?: 0}E${ep.number ?: 0}"
+    return if (ep.title.isNullOrBlank()) code else "$code · ${ep.title}"
+}
+
+@Composable
+private fun SeasonsRow(seasons: List<Season>, onSeason: (Int) -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            text = "Seasons",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(start = 48.dp, bottom = 12.dp),
+        )
+        androidx.compose.foundation.lazy.LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 48.dp),
+        ) {
+            androidx.compose.foundation.lazy.items(seasons, key = { it.number }) { season ->
+                Button(onClick = { onSeason(season.number) }) {
+                    Text(if (season.number == 0) "Specials" else "Season ${season.number}")
                 }
             }
         }
