@@ -84,6 +84,7 @@ fun SeasonScreen(
     showId: String,
     showTitle: String,
     season: Int,
+    onOpenEpisode: (Int) -> Unit,
     onRequireSignIn: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SeasonViewModel = viewModel(key = "season-$showId-$season", factory = SeasonViewModel.factory(showId, season)),
@@ -113,6 +114,7 @@ fun SeasonScreen(
             items(s.data.size) { i ->
                 EpisodeRow(
                     ep = s.data[i],
+                    onOpen = { onOpenEpisode(s.data[i].number ?: 0) },
                     onMarkWatched = { if (signedIn) viewModel.markWatched(s.data[i]) else onRequireSignIn() },
                 )
             }
@@ -121,9 +123,9 @@ fun SeasonScreen(
 }
 
 @Composable
-private fun EpisodeRow(ep: Episode, onMarkWatched: () -> Unit) {
+private fun EpisodeRow(ep: Episode, onOpen: () -> Unit, onMarkWatched: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.fillMaxWidth(0.8f)) {
+        Column(Modifier.fillMaxWidth(0.68f)) {
             Text(
                 text = "${ep.number ?: 0}. ${ep.title ?: "Episode ${ep.number ?: 0}"}",
                 style = MaterialTheme.typography.titleMedium,
@@ -137,7 +139,9 @@ private fun EpisodeRow(ep: Episode, onMarkWatched: () -> Unit) {
                 )
             }
         }
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(12.dp))
+        Button(onClick = onOpen) { Text("Details") }
+        Spacer(Modifier.width(10.dp))
         Button(onClick = onMarkWatched) { Text("✓ Watched") }
     }
 }

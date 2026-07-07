@@ -2,6 +2,7 @@
 
 package com.trakt.tv.ui.home
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +46,8 @@ import com.trakt.tv.data.TraktRepository
 import com.trakt.tv.data.model.MediaItem
 import com.trakt.tv.ui.UiState
 import com.trakt.tv.ui.appContainer
-import com.trakt.tv.ui.components.LoadingView
+import com.trakt.tv.ui.components.FeaturedHero
+import com.trakt.tv.ui.components.HomeSkeleton
 import com.trakt.tv.ui.components.MediaRow
 import com.trakt.tv.ui.components.MessageView
 import com.trakt.tv.watch.WatchLauncher
@@ -105,6 +107,12 @@ class HomeViewModel(private val repo: TraktRepository) : ViewModel() {
         }
     }
 
+    fun addToWatchlist(item: MediaItem, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            onResult(runCatching { repo.addToWatchlist(item) }.getOrDefault(false))
+        }
+    }
+
     private inline fun safe(block: () -> List<MediaItem>): List<MediaItem> =
         runCatching(block).getOrDefault(emptyList())
 
@@ -126,27 +134,45 @@ fun HomeScreen(
     // Streaming apps installed on this device — the launcher's "Apps" row.
     val apps = remember { WatchLauncher.installedProviders(context) }
 
-    Column(modifier.fillMaxSize()) {
-        if (apps.isNotEmpty()) {
-            AppsRow(apps = apps, context = context)
+    when (val s = state) {
+        is UiState.Loading -> Column(modifier.fillMaxSize()) {
+            if (apps.isNotEmpty()) AppsRow(apps = apps, context = context)
+            HomeSkeleton()
         }
-        Box(Modifier.weight(1f).fillMaxWidth()) {
-            when (val s = state) {
-                is UiState.Loading -> LoadingView()
-                is UiState.Error -> MessageView(
-                    message = s.message,
-                    actionLabel = "Retry",
-                    onAction = viewModel::load,
-                )
-                is UiState.Success -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 20.dp, bottom = 48.dp),
-                    verticalArrangement = Arrangement.spacedBy(28.dp),
-                ) {
-                    items(s.data.size) { i ->
-                        val row = s.data[i]
-                        MediaRow(title = row.title, items = row.items, onOpen = onOpen)
+        is UiState.Error -> Column(modifier.fillMaxSize()) {
+            if (apps.isNotEmpty()) AppsRow(apps = apps, context = context)
+            MessageView(message = s.message, actionLabel = "Retry", onAction = viewModel::load)
+        }
+        is UiState.Success -> {
+            val rows = s.data
+            val featured = rows.firstOrNull { it.title == "Continue Watching" }?.items?.firstOrNull()
+                ?: rows.firstOrNull()?.items?.firstOrNull()
+            LazyColumn(
+                modifier = modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 48.dp),
+                verticalArrangement = Arrangement.spacedBy(28.dp),
+            ) {
+                if (featured != null) {
+                    item {
+                        FeaturedHero(
+                            item = featured,
+                            onDetails = { onOpen(featured) },
+                            onWatchlist = {
+                                viewModel.addToWatchlist(featured) { ok ->
+                                    Toast.makeText(
+                                        context,
+                                        if (ok) "Added to watchlist" else "Sign in to use your watchlist",
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                }
+                            },
+                        )
                     }
+                }
+                if (apps.isNotEmpty()) item { AppsRow(apps = apps, context = context) }
+                items(rows.size) { i ->
+                    val row = rows[i]
+                    MediaRow(title = row.title, items = row.items, onOpen = onOpen)
                 }
             }
         }

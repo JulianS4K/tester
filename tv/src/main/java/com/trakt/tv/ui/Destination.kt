@@ -14,6 +14,7 @@ sealed interface Destination {
     data object SignIn : Destination
     data class Detail(val type: MediaType, val id: String, val title: String) : Destination
     data class Season(val showId: String, val showTitle: String, val season: Int) : Destination
+    data class EpisodeDetail(val showId: String, val season: Int, val number: Int) : Destination
     data class Person(val id: String, val name: String) : Destination
     data class ListDetail(val id: String, val name: String) : Destination
 

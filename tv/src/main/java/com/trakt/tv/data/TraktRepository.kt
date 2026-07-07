@@ -124,8 +124,10 @@ class TraktRepository(private val network: Network) {
     suspend fun continueWatching(): List<MediaItem> = io {
         val seen = HashSet<String>()
         api.playback().mapNotNull { pb ->
-            val item = pb.show?.let { MediaItem.from(it) } ?: pb.movie?.let { MediaItem.from(it) }
-            item?.takeIf { seen.add("${it.type}-${it.traktId}") }
+            val base = pb.show?.let { MediaItem.from(it) } ?: pb.movie?.let { MediaItem.from(it) }
+            base
+                ?.copy(progress = (pb.progress / 100.0).toFloat().coerceIn(0f, 1f))
+                ?.takeIf { seen.add("${it.type}-${it.traktId}") }
         }
     }
 
@@ -157,8 +159,19 @@ class TraktRepository(private val network: Network) {
 
     suspend fun episodes(showId: String, season: Int): List<Episode> = io { api.seasonEpisodes(showId, season) }
 
+    suspend fun episode(showId: String, season: Int, number: Int): Episode =
+        io { api.episodeSummary(showId, season, number) }
+
     suspend fun markEpisodeWatched(episodeTrakt: Long): Boolean =
         io { api.addToHistory(SyncItems.episode(Ids(trakt = episodeTrakt))).isSuccessful }
+
+    suspend fun rateEpisode(episodeTrakt: Long, rating: Int): Boolean = io {
+        api.addRatings(
+            com.trakt.tv.data.model.SyncRatings(
+                episodes = listOf(com.trakt.tv.data.model.RatingItem(rating, Ids(trakt = episodeTrakt))),
+            ),
+        ).isSuccessful
+    }
 
     // ---- People / credits ----
 

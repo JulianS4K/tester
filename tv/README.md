@@ -32,7 +32,8 @@ blank screen), as a launcher should.
 | Area | Details |
 |---|---|
 | 🔐 **Sign in** | Trakt **device OAuth flow** — no keyboard needed. Shows a `user_code` + `verification_url` and a **QR code**; you authorize on your phone while the TV polls for the token. Tokens are stored in DataStore and **auto-refreshed** on expiry. |
-| 🏠 **Home (launcher)** | Top **Apps row** launches the streaming apps installed on the TV; then **Your Watchlist** (when signed in) and Trending / Popular / Anticipated rows. Works as the device's default Home app. |
+| 🏠 **Home (launcher)** | Immersive **featured hero** up top, a launcher **status bar** (live clock + date + user), the **Apps row**, **Continue Watching** (with progress bars), **Your Watchlist**, and Trending / Recommended / Box Office / Anticipated rows. Loading shows a **skeleton**. Works as the device's default Home app. |
+| 🎬 **Episode detail** | From Seasons → Episodes, open an episode for its still, overview, **Mark Watched** and **Rate**. |
 | 🔎 **Search** | Text query across movies & shows (debounced), poster grid of results. |
 | 📄 **Detail** | Backdrop, overview, rating, genres, runtime, **Up Next** episode, **Seasons → Episodes** (per-episode mark-watched), **Cast** (→ person page), and "More like this". |
 | ➕ **Track actions** | Add to **Watchlist**, **Mark Watched**, **Add to Collection**, and **Rate 1–10** (writes to `/sync/*`). Prompts sign-in when needed. |

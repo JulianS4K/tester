@@ -2,6 +2,7 @@
 
 package com.trakt.tv.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -68,6 +70,23 @@ fun PosterCard(
                 )
             } else {
                 PosterPlaceholder(item.title)
+            }
+            val progress = item.progress
+            if (progress != null && progress > 0f) {
+                Box(
+                    Modifier
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .height(5.dp)
+                        .background(Color(0x99000000)),
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth(progress.coerceIn(0.02f, 1f))
+                            .height(5.dp)
+                            .background(MaterialTheme.colorScheme.primary),
+                    )
+                }
             }
         }
         Text(

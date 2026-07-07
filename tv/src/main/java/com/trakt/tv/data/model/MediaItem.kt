@@ -31,6 +31,8 @@ data class MediaItem(
     val certification: String?,
     val status: String?,
     val ids: Ids,
+    /** 0f..1f watch progress for "Continue Watching" cards; null when not applicable. */
+    val progress: Float? = null,
 ) {
     val subtitle: String
         get() = buildString {

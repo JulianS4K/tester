@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -21,7 +22,9 @@ import com.trakt.tv.data.model.MediaItem
 import com.trakt.tv.ui.browse.BrowseScreen
 import com.trakt.tv.ui.components.MessageView
 import com.trakt.tv.ui.components.NavRail
+import com.trakt.tv.ui.components.StatusBar
 import com.trakt.tv.ui.detail.DetailScreen
+import com.trakt.tv.ui.episode.EpisodeDetailScreen
 import com.trakt.tv.ui.home.HomeScreen
 import com.trakt.tv.ui.library.LibraryScreen
 import com.trakt.tv.ui.lists.ListDetailScreen
@@ -119,6 +122,13 @@ fun TraktApp(container: AppContainer) {
                         showId = dest.showId,
                         showTitle = dest.showTitle,
                         season = dest.season,
+                        onOpenEpisode = { number -> push(Destination.EpisodeDetail(dest.showId, dest.season, number)) },
+                        onRequireSignIn = { push(Destination.SignIn) },
+                    )
+                    is Destination.EpisodeDetail -> EpisodeDetailScreen(
+                        showId = dest.showId,
+                        season = dest.season,
+                        number = dest.number,
                         onRequireSignIn = { push(Destination.SignIn) },
                     )
                     is Destination.Person -> PersonScreen(
@@ -131,6 +141,9 @@ fun TraktApp(container: AppContainer) {
                         name = dest.name,
                         onOpen = openItem,
                     )
+                }
+                if (current.isRoot) {
+                    StatusBar(username = username, modifier = Modifier.align(Alignment.TopEnd))
                 }
             }
         }

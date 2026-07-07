@@ -217,6 +217,14 @@ interface TraktApi {
         @Query("extended") extended: String = "full,images",
     ): List<Episode>
 
+    @GET("shows/{id}/seasons/{season}/episodes/{episode}")
+    suspend fun episodeSummary(
+        @Path("id") id: String,
+        @Path("season") season: Int,
+        @Path("episode") episode: Int,
+        @Query("extended") extended: String = "full,images",
+    ): Episode
+
     // ---- People / credits ----
 
     @GET("shows/{id}/people")
