@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- This is a TV app, but leanback is not *required* so it also installs on
+         Google TV, Chromecast-with-Google-TV and regular Android for testing. -->
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+    <!-- TVs have no touchscreen; declaring this false is mandatory for TV apps. -->
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <!-- Package visibility (Android 11+): so we can detect installed streaming
+         apps and resolve web-search / web-view intents for "Ways to watch". -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.WEB_SEARCH" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+        </intent>
+
+        <package android:name="com.netflix.ninja" />
+        <package android:name="com.netflix.mediaclient" />
+        <package android:name="com.amazon.avod" />
+        <package android:name="com.amazon.amazonvideo.livingroom" />
+        <package android:name="com.amazon.avod.thirdpartyclient" />
+        <package android:name="com.disney.disneyplus" />
+        <package android:name="com.wbd.stream" />
+        <package android:name="com.hbo.hbonow" />
+        <package android:name="com.hulu.livingroomplus" />
+        <package android:name="com.hulu.plus" />
+        <package android:name="com.apple.atve.androidtv.appletv" />
+        <package android:name="com.apple.atve.amazon.appletv" />
+        <package android:name="com.cbs.ott" />
+        <package android:name="com.peacocktv.peacockandroid" />
+        <package android:name="com.google.android.youtube.tv" />
+        <package android:name="com.amazon.firetv.youtube" />
+        <package android:name="com.google.android.youtube" />
+    </queries>
+
+    <application
+        android:name=".TraktTvApp"
+        android:allowBackup="true"
+        android:banner="@drawable/tv_banner"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TraktTv"
+        tools:targetApi="35">
+
+        <activity
+            android:name=".MainActivity"
+            android:banner="@drawable/tv_banner"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:stateNotNeeded="true"
+            android:theme="@style/Theme.TraktTv">
+            <!-- Normal launcher entry (app grid + non-TV devices). -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Home-screen launcher: lets the user set this as the TV's default
+                 Home app (Google TV / Android TV: Settings → Apps → Default apps →
+                 Home app, or the picker shown when pressing the Home button).
+                 Note: Fire TV locks its launcher and won't offer this. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

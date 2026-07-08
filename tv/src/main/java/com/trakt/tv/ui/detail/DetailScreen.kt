@@ -1,0 +1,422 @@
+@file:OptIn(ExperimentalTvMaterial3Api::class, ExperimentalLayoutApi::class)
+
+package com.trakt.tv.ui.detail
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.tv.material3.Button
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Text
+import coil.compose.AsyncImage
+import com.trakt.tv.data.TraktRepository
+import com.trakt.tv.data.model.CastItem
+import com.trakt.tv.data.model.Episode
+import com.trakt.tv.data.model.MediaItem
+import com.trakt.tv.data.model.MediaType
+import com.trakt.tv.data.model.Season
+import com.trakt.tv.ui.UiState
+import com.trakt.tv.ui.appContainer
+import com.trakt.tv.ui.components.LoadingView
+import com.trakt.tv.ui.components.CastRow
+import com.trakt.tv.ui.components.MediaRow
+import com.trakt.tv.ui.components.MessageView
+import com.trakt.tv.ui.components.RatingBadge
+import com.trakt.tv.watch.WatchLauncher
+import com.trakt.tv.watch.WatchLinks
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+data class DetailUi(
+    val item: MediaItem,
+    val related: List<MediaItem>,
+    val cast: List<CastItem> = emptyList(),
+    val seasons: List<Season> = emptyList(),
+    val upNext: Episode? = null,
+)
+
+class DetailViewModel(
+    private val repo: TraktRepository,
+    private val type: MediaType,
+    private val id: String,
+) : ViewModel() {
+
+    private val _state = MutableStateFlow<UiState<DetailUi>>(UiState.Loading)
+    val state: StateFlow<UiState<DetailUi>> = _state.asStateFlow()
+
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message.asStateFlow()
+
+    val signedIn: StateFlow<Boolean> =
+        repo.isSignedIn.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    init { load() }
+
+    fun load() {
+        viewModelScope.launch {
+            _state.value = UiState.Loading
+            _state.value = runCatching {
+                coroutineScope {
+                    val detail = async { repo.detail(type, id) }
+                    val related = async { runCatching { repo.related(type, id) }.getOrDefault(emptyList()) }
+                    val cast = async { runCatching { repo.credits(type, id) }.getOrDefault(emptyList()) }
+                    val seasons = async {
+                        if (type == MediaType.SHOW) runCatching { repo.seasons(id) }.getOrDefault(emptyList()) else emptyList()
+                    }
+                    val progress = async {
+                        if (type == MediaType.SHOW) repo.watchedProgress(id)?.nextEpisode else null
+                    }
+                    DetailUi(detail.await(), related.await(), cast.await(), seasons.await(), progress.await())
+                }
+            }.fold(
+                onSuccess = { UiState.Success(it) },
+                onFailure = { UiState.Error("Couldn't load this title.") },
+            )
+        }
+    }
+
+    fun addToWatchlist() = act("Added to watchlist", "Couldn't add to watchlist") { repo.addToWatchlist(it) }
+    fun markWatched() = act("Marked as watched", "Couldn't mark as watched") { repo.markWatched(it) }
+    fun addToCollection() = act("Added to collection", "Couldn't add to collection") { repo.addToCollection(it) }
+    fun rate(rating: Int) = act("Rated $rating/10", "Couldn't rate") { repo.rate(it, rating) }
+
+    private fun act(ok: String, fail: String, action: suspend (MediaItem) -> Boolean) {
+        val item = (state.value as? UiState.Success)?.data?.item ?: return
+        viewModelScope.launch {
+            val success = runCatching { action(item) }.getOrDefault(false)
+            _message.value = if (success) ok else fail
+        }
+    }
+
+    fun consumeMessage() { _message.value = null }
+
+    companion object {
+        fun factory(type: MediaType, id: String) = viewModelFactory {
+            initializer { DetailViewModel(appContainer().repository, type, id) }
+        }
+    }
+}
+
+@Composable
+fun DetailScreen(
+    type: MediaType,
+    id: String,
+    onOpen: (MediaItem) -> Unit,
+    onPerson: (CastItem) -> Unit,
+    onSeason: (Int) -> Unit,
+    onRequireSignIn: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: DetailViewModel = viewModel(
+        key = "detail-$type-$id",
+        factory = DetailViewModel.factory(type, id),
+    ),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val signedIn by viewModel.signedIn.collectAsStateWithLifecycle()
+    val message by viewModel.message.collectAsStateWithLifecycle()
+
+    when (val s = state) {
+        is UiState.Loading -> LoadingView(modifier)
+        is UiState.Error -> MessageView(message = s.message, modifier = modifier, actionLabel = "Retry", onAction = viewModel::load)
+        is UiState.Success -> DetailContent(
+            ui = s.data,
+            signedIn = signedIn,
+            actionMessage = message,
+            onAddWatchlist = { if (signedIn) viewModel.addToWatchlist() else onRequireSignIn() },
+            onMarkWatched = { if (signedIn) viewModel.markWatched() else onRequireSignIn() },
+            onAddCollection = { if (signedIn) viewModel.addToCollection() else onRequireSignIn() },
+            onRate = { rating -> if (signedIn) viewModel.rate(rating) else onRequireSignIn() },
+            onOpen = onOpen,
+            onPerson = onPerson,
+            onSeason = onSeason,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun DetailContent(
+    ui: DetailUi,
+    signedIn: Boolean,
+    actionMessage: String?,
+    onAddWatchlist: () -> Unit,
+    onMarkWatched: () -> Unit,
+    onAddCollection: () -> Unit,
+    onRate: (Int) -> Unit,
+    onOpen: (MediaItem) -> Unit,
+    onPerson: (CastItem) -> Unit,
+    onSeason: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val item = ui.item
+    Box(modifier.fillMaxSize()) {
+        if (item.backdropUrl != null) {
+            AsyncImage(
+                model = item.backdropUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().height(520.dp),
+            )
+        }
+        // Scrims for text legibility over the backdrop.
+        Box(
+            Modifier.fillMaxWidth().height(520.dp).background(
+                Brush.verticalGradient(listOf(Color(0xCC0B0B0F), Color(0xFF0B0B0F))),
+            ),
+        )
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.horizontalGradient(listOf(Color(0xFF0B0B0F), Color(0x000B0B0F))),
+            ),
+        )
+
+        LazyColumn(contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 48.dp)) {
+            item {
+                Column(Modifier.padding(start = 48.dp, top = 64.dp, end = 48.dp).fillMaxWidth(0.62f)) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    MetaRow(item)
+                    if (ui.upNext != null) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "Up next: " + episodeLabel(ui.upNext),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    if (!item.overview.isNullOrBlank()) {
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = item.overview,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 5,
+                        )
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    WatchSection(item)
+                    Spacer(Modifier.height(24.dp))
+                    Text(
+                        "Track",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Button(onClick = onAddWatchlist) {
+                            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Watchlist")
+                        }
+                        Button(onClick = onMarkWatched) {
+                            Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Mark Watched")
+                        }
+                        Button(onClick = onAddCollection) {
+                            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Collection")
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "Rate",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        for (n in 1..10) {
+                            Button(onClick = { onRate(n) }) { Text(n.toString()) }
+                        }
+                    }
+                    if (actionMessage != null) {
+                        Spacer(Modifier.height(12.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Icon(Icons.Filled.Done, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                            Text(actionMessage, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                    if (!signedIn) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Sign in to save to your Trakt watchlist & history.",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            if (ui.seasons.isNotEmpty()) {
+                item { Spacer(Modifier.height(36.dp)) }
+                item { SeasonsRow(ui.seasons, onSeason) }
+            }
+            if (ui.cast.isNotEmpty()) {
+                item { Spacer(Modifier.height(36.dp)) }
+                item { CastRow(title = "Cast", cast = ui.cast, onOpen = onPerson) }
+            }
+            if (ui.related.isNotEmpty()) {
+                item { Spacer(Modifier.height(36.dp)) }
+                item {
+                    MediaRow(title = "More like this", items = ui.related, onOpen = onOpen)
+                }
+            }
+        }
+    }
+}
+
+/** Episode label like "S2E5 · The Fly". */
+private fun episodeLabel(ep: Episode): String {
+    val code = "S${ep.season ?: 0}E${ep.number ?: 0}"
+    return if (ep.title.isNullOrBlank()) code else "$code · ${ep.title}"
+}
+
+@Composable
+private fun SeasonsRow(seasons: List<Season>, onSeason: (Int) -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            text = "Seasons",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(start = 48.dp, bottom = 12.dp),
+        )
+        androidx.compose.foundation.lazy.LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 48.dp),
+        ) {
+            androidx.compose.foundation.lazy.items(seasons, key = { it.number }) { season ->
+                Button(onClick = { onSeason(season.number) }) {
+                    Text(if (season.number == 0) "Specials" else "Season ${season.number}")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WatchSection(item: MediaItem) {
+    val context = LocalContext.current
+    val installed = remember(item.traktId) { WatchLauncher.installedProviders(context) }
+    val canSearch = remember { WatchLauncher.canWebSearch(context) }
+    val canWeb = remember { WatchLauncher.canOpenUrls(context) }
+
+    val webLinks = buildList {
+        add("Trakt" to WatchLinks.traktUrl(item))
+        WatchLinks.imdbUrl(item)?.let { add("IMDb" to it) }
+        WatchLinks.tmdbUrl(item)?.let { add("TMDB" to it) }
+    }
+
+    Text(
+        "Ways to watch",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (canSearch) {
+            Button(onClick = { WatchLauncher.webSearch(context, item.title) }) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Search on this TV")
+            }
+        }
+        installed.forEach { entry ->
+            Button(onClick = { WatchLauncher.launch(context, entry, item.title) }) {
+                Text(entry.provider.name)
+            }
+        }
+    }
+
+    if (installed.isEmpty() && !canSearch) {
+        Text(
+            "No streaming apps detected on this device.",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+    }
+
+    if (canWeb && webLinks.isNotEmpty()) {
+        Spacer(Modifier.height(12.dp))
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            webLinks.forEach { (label, url) ->
+                Button(onClick = { WatchLauncher.openUrl(context, url) }) {
+                    Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(label)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MetaRow(item: MediaItem) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        RatingBadge(item.rating)
+        val bits = buildList {
+            item.year?.let { add(it.toString()) }
+            item.runtime?.takeIf { it > 0 }?.let { add("${it}m") }
+            item.certification?.takeIf { it.isNotBlank() }?.let { add(it) }
+            item.network?.let { add(it) }
+            if (item.genres.isNotEmpty()) add(item.genres.take(3).joinToString(", "))
+        }
+        if (bits.isNotEmpty()) {
+            Text(
+                text = bits.joinToString("   ·   "),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}

@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Trakt TV</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_library">Library</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Sign in -->
+    <string name="signin_title">Connect your Trakt account</string>
+    <string name="signin_step_url">1. On your phone or computer, go to</string>
+    <string name="signin_step_code">2. Enter this code</string>
+    <string name="signin_waiting">Waiting for you to authorize…</string>
+    <string name="signin_scan">or scan to open the page</string>
+    <string name="signin_skip">Browse without signing in</string>
+    <string name="signin_missing_keys">No Trakt API key configured. Add trakt.clientId / trakt.clientSecret to local.properties and rebuild.</string>
+</resources>

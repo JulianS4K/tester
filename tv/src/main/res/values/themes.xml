@@ -1,0 +1,8 @@
+<resources>
+    <!-- Plain window theme; all visual styling is done in Compose (TV Material). -->
+    <style name="Theme.TraktTv" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/tv_background</item>
+        <item name="android:statusBarColor">@color/tv_background</item>
+        <item name="android:navigationBarColor">@color/tv_background</item>
+    </style>
+</resources>
