@@ -1,0 +1,20 @@
+# systemd unit to run the Hearth server on boot.
+#   sudo cp scripts/hearth.service /etc/systemd/system/hearth.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now hearth
+# Edit User / WorkingDirectory to match where you cloned the repo.
+[Unit]
+Description=Hearth family calendar
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/tester/hearth
+ExecStart=/usr/bin/node server/index.js
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

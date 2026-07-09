@@ -1,0 +1,6 @@
+node_modules/
+.env
+data/store.json
+photos/*
+!photos/.gitkeep
+*.log
