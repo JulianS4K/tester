@@ -105,6 +105,7 @@ function renderHome() {
     ${TILE('wide', '#c2410c', 'News', '<div class="face" id="tile-news"></div>', 'data-tab="news"')}
     ${TILE('', '#6741d9', 'Chores', `<div class="face"><div class="t-main">${choresDone}/${state.chores.length}</div><div class="t-sub">done</div></div>`, 'data-tab="chores"')}
     ${TILE('', '#d6336c', 'Health', `<div class="face"><div class="t-main">${habitsDone}/${habits.length}</div><div class="t-sub">habits</div></div>`, 'data-tab="health"')}
+    ${TILE('wide', '#7048e8', 'My Mood', '<div class="face" id="tile-mood"></div>', 'data-action="mood"')}
     ${TILE('', '#e8590c', 'Tonight', `<div class="face"><div class="t-main small">${esc(meal)}</div><div class="t-sub">dinner</div></div>`, 'data-tab="meals"')}
     ${TILE('', '#1c7ed6', 'Lists', `<div class="face"><div class="t-main">${state.list.length}</div><div class="t-sub">items</div></div>`, 'data-tab="list"')}
     ${TILE('tall photo', '#111', '', '<div class="scrim"></div>', 'id="tile-photo" data-tab="home"')}
@@ -114,6 +115,8 @@ function renderHome() {
   view.querySelectorAll('[data-tab]').forEach((t) => t.addEventListener('click', () => { tab = t.dataset.tab; render(); }));
   const notesTile = view.querySelector('[data-action="notes"]');
   if (notesTile) notesTile.addEventListener('click', openNotes);
+  const moodTile = view.querySelector('[data-action="mood"]');
+  if (moodTile) moodTile.addEventListener('click', openMoodCheck);
 
   tickClock();
   fillWeatherTile();
@@ -121,7 +124,41 @@ function renderHome() {
   refreshNewsTile();
   refreshPhotoTile();
   refreshNotesTile();
+  fillMoodTile();
   startTiles();
+}
+
+function primaryPerson() { return (state.health?.people || [])[0] || null; }
+
+function fillMoodTile() {
+  const el = document.getElementById('tile-mood');
+  if (!el) return;
+  const p = primaryPerson();
+  const mood = p ? (state.health.today?.[p.id]?.mood || null) : null;
+  const hist = p ? (state.health.moodHistory?.[p.id] || []) : [];
+  const trend = hist.slice(-7).map((d) => d.mood ? `<span>${d.mood}</span>` : '<span style="opacity:.3">·</span>').join(' ');
+  el.innerHTML = mood
+    ? `<div class="t-emoji">${mood}</div><div class="t-sub">Tap to update · ${trend}</div>`
+    : `<div class="t-main small">How are you today?</div><div class="t-sub">Tap to check in · ${trend}</div>`;
+  const tile = el.closest('.tile');
+  if (tile) tile.classList.toggle('nudge', !mood);
+}
+
+async function openMoodCheck() {
+  let p = primaryPerson();
+  const modal = document.getElementById('modal');
+  const btns = MOODS.map((m) => `<button class="mood" style="font-size:46px;padding:12px 14px" data-pick="${m}">${m}</button>`).join('');
+  modal.innerHTML = `<div class="sheet"><h2>How are you feeling?</h2>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0">${btns}</div>
+    <div style="text-align:right;margin-top:12px"><button class="btn" id="mood-close">Close</button></div></div>`;
+  modal.hidden = false;
+  modal.querySelector('#mood-close').onclick = () => { modal.hidden = true; };
+  modal.querySelectorAll('[data-pick]').forEach((b) => b.onclick = async () => {
+    if (!p) p = await api.addPerson('Me', '🙂');
+    await api.metric(p.id, 'mood', b.dataset.pick);
+    modal.hidden = true;
+    await loadState();
+  });
 }
 
 function applyFlip(el) { if (!el) return; el.classList.remove('flip'); void el.offsetWidth; el.classList.add('flip'); }
@@ -308,9 +345,11 @@ function renderHealth() {
     const habits = h.habits.filter((x) => x.personId === p.id);
     const chips = habits.map((hb) => `<button class="habit-chip ${hb.doneToday ? 'done' : ''}" data-hab="${hb.id}">${hb.emoji || '✅'} ${esc(hb.name)}${hb.streak ? ` <span class="streak">🔥${hb.streak}</span>` : ''} <span class="del" data-rmhab="${hb.id}">✕</span></button>`).join('') || '<span class="muted">No habits yet</span>';
     const moods = MOODS.map((m) => `<button class="mood ${today.mood === m ? 'sel' : ''}" data-mood="${p.id}|${m}">${m}</button>`).join('');
+    const trend = (h.moodHistory?.[p.id] || []).map((d) => d.mood || '·').join(' ');
     return `<div class="person-card">
       <div class="p-head"><span>${p.emoji || '🙂'}</span><span>${esc(p.name)}</span><button class="del" data-rmperson="${p.id}">✕</button></div>
       <div class="metric-row"><span class="lab">Mood</span>${moods}</div>
+      <div class="metric-row"><span class="lab">14-day</span><span style="font-size:20px;letter-spacing:3px">${trend}</span></div>
       <div class="metric-row"><span class="lab">Water</span><button class="pill" data-water="${p.id}|-1">−</button><span>💧 ${today.water || 0}</span><button class="pill" data-water="${p.id}|1">＋</button></div>
       <div class="metric-row"><span class="lab">Weight</span><input class="pill" style="width:120px" data-weight="${p.id}" value="${esc(today.weight || '')}" placeholder="—" /></div>
       <div style="margin-top:10px">${chips}</div>

@@ -205,6 +205,17 @@ class Store {
     return m[dateKey][personId];
   }
 
+  // Last `days` of a person's mood (oldest → newest), for behavior tracking.
+  moodHistory(personId, days = 14) {
+    const out = [];
+    let day = todayKey();
+    for (let i = 0; i < days; i++) {
+      out.push({ date: day, mood: this.data.health.metrics[day]?.[personId]?.mood || null });
+      day = addDaysKey(day, -1);
+    }
+    return out.reverse();
+  }
+
   // ---- News feeds ----
   newsFeeds() { return this.data.news; }
   addNewsFeed(name, url) {
@@ -235,6 +246,7 @@ class Store {
         people: h.people,
         habits: h.habits.map((hb) => ({ ...hb, doneToday: (h.habitLog[today] || []).includes(hb.id), streak: this.habitStreak(hb.id) })),
         today: h.metrics[today] || {},
+        moodHistory: Object.fromEntries(h.people.map((p) => [p.id, this.moodHistory(p.id, 14)])),
       },
       news: this.data.news.map(({ id, name }) => ({ id, name })),
       notes: this.data.notes,

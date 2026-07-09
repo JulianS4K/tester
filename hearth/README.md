@@ -25,6 +25,9 @@ tonight's dinner, photos, notes — each tapping through to its full view.
   iCloud, Outlook, Cozi, school/sports…), each **color-coded per person**. Month
   grid + an **Up Next** agenda. Recurring events are expanded correctly.
 - **📰 News** — aggregate any **RSS/Atom** feeds (free, no API key); merged, newest first.
+- **🙂 Daily mood check-in** — a prominent **My Mood** tile on the home screen
+  (it nudges you if you haven't checked in today); tap to log how you feel, and see
+  a **14-day mood trend** to track your own behavior over time.
 - **❤️ Health & Habits** — per-person **habits with streaks** (🔥), plus **water**,
   **mood**, and **weight** logging. Tap to check off.
 - **✅ Chores** — per-person checkable chores, one-tap **Reset all**.

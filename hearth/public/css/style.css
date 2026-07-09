@@ -124,6 +124,8 @@ button { font-family: inherit; cursor: pointer; }
 .tile.photo { background-size: cover; background-position: center; }
 .tile.photo .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,.55)); }
 .tile .corner { position: absolute; top: 14px; right: 16px; font-size: 22px; opacity: .9; }
+.tile.nudge { animation: nudge 2.4s ease-in-out infinite; }
+@keyframes nudge { 0%, 100% { box-shadow: 0 6px 22px rgba(0,0,0,.28); } 50% { box-shadow: 0 0 0 3px rgba(255,255,255,.55), 0 6px 22px rgba(0,0,0,.28); } }
 
 /* ---- Health ---- */
 .people { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
