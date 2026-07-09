@@ -10,11 +10,24 @@ let gridEvents = [];
 let upcoming = [];
 let weather = null;
 let newsItems = [];
-let state = { calendars: [], chores: [], list: [], meals: {}, health: { people: [], habits: [], today: {} }, notes: '' };
+let otdItems = [];
+let state = { calendars: [], chores: [], list: [], meals: {}, health: { people: [], habits: [], today: {} }, notes: '', reminders: [], theme: { accent: '#4c8dff' } };
 let calIdx = 0;
 let newsIdx = 0;
 let photoIdx = 0;
+let otdIdx = 0;
 let tileTimers = [];
+
+function applyTheme() {
+  const accent = state.theme?.accent || '#4c8dff';
+  document.documentElement.style.setProperty('--accent', accent);
+}
+function daysUntil(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const t = new Date(y, m - 1, d);
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  return Math.round((t - now) / 86400000);
+}
 
 // ---------- helpers ----------
 const pad = (n) => String(n).padStart(2, '0');
@@ -55,7 +68,8 @@ async function loadNews() {
 }
 
 // ---------- data ----------
-async function loadState() { state = await api.state(); if (tab !== 'calendar') render(); else renderAgenda(); }
+async function loadState() { state = await api.state(); applyTheme(); if (tab !== 'calendar') render(); else renderAgenda(); }
+async function loadOtd() { otdItems = (await api.onThisDay().catch(() => ({ items: [] }))).items || []; if (tab === 'home') refreshOtdTile(); }
 async function loadGrid() {
   const start = addDays(monthCursor, -7);
   const end = addDays(firstOfMonth(addDays(monthCursor, 40)), 14);
@@ -108,6 +122,8 @@ function renderHome() {
     ${TILE('wide', '#7048e8', 'My Mood', '<div class="face" id="tile-mood"></div>', 'data-action="mood"')}
     ${TILE('', '#e8590c', 'Tonight', `<div class="face"><div class="t-main small">${esc(meal)}</div><div class="t-sub">dinner</div></div>`, 'data-tab="meals"')}
     ${TILE('', '#1c7ed6', 'Lists', `<div class="face"><div class="t-main">${state.list.length}</div><div class="t-sub">items</div></div>`, 'data-tab="list"')}
+    ${TILE('', '#0ca678', 'Countdown', '<div class="face" id="tile-countdown"></div>', 'data-action="settings"')}
+    ${TILE('wide', '#5c7cfa', 'On This Day', '<div class="face" id="tile-otd"></div>')}
     ${TILE('tall photo', '#111', '', '<div class="scrim"></div>', 'id="tile-photo" data-tab="home"')}
     ${TILE('wide', '#495057', 'Notes', '<div class="face"><div class="t-main small" id="tile-notes"></div></div>', 'data-action="notes"')}
   </div>`;
@@ -117,6 +133,8 @@ function renderHome() {
   if (notesTile) notesTile.addEventListener('click', openNotes);
   const moodTile = view.querySelector('[data-action="mood"]');
   if (moodTile) moodTile.addEventListener('click', openMoodCheck);
+  const setTile = view.querySelector('[data-action="settings"]');
+  if (setTile) setTile.addEventListener('click', openSettings);
 
   tickClock();
   fillWeatherTile();
@@ -125,7 +143,30 @@ function renderHome() {
   refreshPhotoTile();
   refreshNotesTile();
   fillMoodTile();
+  fillCountdownTile();
+  refreshOtdTile();
   startTiles();
+}
+
+function fillCountdownTile() {
+  const el = document.getElementById('tile-countdown');
+  if (!el) return;
+  const up = (state.reminders || []).filter((r) => daysUntil(r.date) >= 0).sort((a, b) => a.date.localeCompare(b.date));
+  if (!up.length) { el.innerHTML = '<div class="t-main small">No reminders</div><div class="t-sub">Add in ⚙</div>'; return; }
+  const r = up[0];
+  const n = daysUntil(r.date);
+  const when = n === 0 ? 'Today!' : n === 1 ? 'Tomorrow' : `in ${n} days`;
+  el.innerHTML = `<div class="t-emoji">${r.emoji || '📌'}</div><div class="t-main small">${esc(r.title)}</div><div class="t-sub">${when}</div>`;
+}
+
+function refreshOtdTile() {
+  const el = document.getElementById('tile-otd');
+  if (!el) return;
+  if (!otdItems.length) { el.innerHTML = '<div class="t-main small">On This Day…</div>'; return; }
+  otdIdx %= otdItems.length;
+  const it = otdItems[otdIdx];
+  el.innerHTML = `<div class="corner">🗓️</div><div class="t-main small">${it.year}</div><div class="t-sub">${esc(it.text)}</div>`;
+  applyFlip(el);
 }
 
 function primaryPerson() { return (state.health?.people || [])[0] || null; }
@@ -212,6 +253,7 @@ function startTiles() {
   tileTimers.push(setInterval(() => { calIdx++; refreshCalTile(); }, 6000));
   tileTimers.push(setInterval(() => { newsIdx++; refreshNewsTile(); }, 7000));
   tileTimers.push(setInterval(() => { photoIdx++; refreshPhotoTile(); }, 9000));
+  tileTimers.push(setInterval(() => { otdIdx++; refreshOtdTile(); }, 11000));
 }
 function clearTiles() { tileTimers.forEach(clearInterval); tileTimers = []; }
 
@@ -426,7 +468,15 @@ function openSettings() {
     <div class="add-row"><input id="cal-name" style="max-width:150px" placeholder="Name" /><input id="cal-url" placeholder="https://…/basic.ics" /></div>
     <div class="add-row"><div id="palette" style="display:flex;gap:8px;flex:1"></div>
     <button class="btn accent" id="cal-add">Add</button></div>
-    <div style="text-align:right;margin-top:16px"><button class="btn" id="close">Close</button></div>
+
+    <h2 style="margin-top:24px">Reminders &amp; countdowns</h2>
+    ${(state.reminders || []).map((r) => `<div class="cal-list-item"><span>${r.emoji || '📌'}</span><span>${esc(r.title)}</span><span class="muted">${esc(r.date)}</span><button class="del" data-rmrem="${r.id}" style="margin-left:auto">✕</button></div>`).join('') || '<div class="muted">No reminders yet.</div>'}
+    <div class="add-row"><input id="rem-emoji" style="max-width:70px" placeholder="🎂" /><input id="rem-title" placeholder="e.g. Mom's birthday" /><input id="rem-date" type="date" style="max-width:180px" /><button class="btn accent" id="rem-add">Add</button></div>
+
+    <h2 style="margin-top:24px">Theme accent</h2>
+    <div id="theme-palette" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+
+    <div style="text-align:right;margin-top:20px"><button class="btn" id="close">Close</button></div>
   </div>`;
   modal.hidden = false;
   let chosen = PALETTE[state.calendars.length % PALETTE.length];
@@ -447,6 +497,29 @@ function openSettings() {
   };
   modal.querySelectorAll('[data-rmcal]').forEach((b) => b.onclick = async () => {
     await api.removeCalendar(b.dataset.rmcal); await loadState(); await loadGrid(); await loadUpcoming(); openSettings();
+  });
+
+  // Reminders
+  modal.querySelector('#rem-add').onclick = async () => {
+    const title = modal.querySelector('#rem-title').value.trim();
+    const date = modal.querySelector('#rem-date').value;
+    if (!title || !date) return;
+    await api.addReminder(title, date, modal.querySelector('#rem-emoji').value.trim() || '📌');
+    await loadState(); openSettings();
+  };
+  modal.querySelectorAll('[data-rmrem]').forEach((b) => b.onclick = async () => {
+    await api.removeReminder(b.dataset.rmrem); await loadState(); openSettings();
+  });
+
+  // Theme accent
+  const THEMES = ['#4c8dff', '#e5484d', '#2f9e44', '#9b51e0', '#f2994a', '#12b5b0', '#e64980', '#f59f00'];
+  const tp = modal.querySelector('#theme-palette');
+  THEMES.forEach((col) => {
+    const b = document.createElement('button');
+    b.className = 'swatch'; b.style.background = col; b.style.width = '40px'; b.style.height = '40px';
+    b.style.border = col === (state.theme?.accent) ? '3px solid #fff' : '0';
+    b.onclick = async () => { await api.setTheme(col); state.theme = { accent: col }; applyTheme(); openSettings(); };
+    tp.appendChild(b);
   });
 }
 
@@ -488,13 +561,15 @@ async function boot() {
   tickClock();
   setInterval(tickClock, 10_000);
   render();
-  await Promise.all([loadState(), loadGrid(), loadUpcoming(), loadWeather(), loadPhotos(), loadNews()]);
+  await Promise.all([loadState(), loadGrid(), loadUpcoming(), loadWeather(), loadPhotos(), loadNews(), loadOtd()]);
+  applyTheme();
   render();
   resetIdle();
   setInterval(loadWeather, 15 * 60_000);
   setInterval(() => { loadGrid(); loadUpcoming(); }, 15 * 60_000);
   setInterval(loadNews, 15 * 60_000);
   setInterval(loadPhotos, 10 * 60_000);
+  setInterval(loadOtd, 6 * 60 * 60_000);
 }
 
 boot();

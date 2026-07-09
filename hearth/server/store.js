@@ -32,6 +32,8 @@ class Store {
       health: { people: [], habits: [], habitLog: {}, metrics: {} },
       news: [],
       notes: '',
+      reminders: [],
+      theme: { accent: '#4c8dff' },
     };
   }
 
@@ -54,6 +56,8 @@ class Store {
     this.data.health.metrics ||= {};
     this.data.news ||= [];
     this.data.notes ??= '';
+    this.data.reminders ||= [];
+    this.data.theme ||= { accent: '#4c8dff' };
 
     // Seed feeds from config on first run.
     if (this.data.calendars.length === 0 && config.seedFeeds.length) {
@@ -233,6 +237,25 @@ class Store {
   // ---- Notes ----
   setNotes(text) { this.data.notes = text || ''; this.save(); return this.data.notes; }
 
+  // ---- Reminders / countdowns ----
+  addReminder(title, date, emoji) {
+    const r = { id: randomUUID(), title: title || 'Reminder', date: date || todayKey(), emoji: emoji || '📌' };
+    this.data.reminders.push(r);
+    this.save();
+    return r;
+  }
+  removeReminder(id) {
+    this.data.reminders = this.data.reminders.filter((r) => r.id !== id);
+    this.save();
+  }
+
+  // ---- Theme ----
+  setTheme(accent) {
+    if (accent) this.data.theme.accent = accent;
+    this.save();
+    return this.data.theme;
+  }
+
   // Public snapshot (calendar/news urls stripped — the browser never needs them).
   snapshot() {
     const today = todayKey();
@@ -250,6 +273,8 @@ class Store {
       },
       news: this.data.news.map(({ id, name }) => ({ id, name })),
       notes: this.data.notes,
+      reminders: [...this.data.reminders].sort((a, b) => a.date.localeCompare(b.date)),
+      theme: this.data.theme,
     };
   }
 }

@@ -39,4 +39,10 @@ export const api = {
 
   // Notes
   setNotes: (notes) => fetch('/api/notes', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notes }) }).then(j),
+
+  // Reminders + theme + fun
+  addReminder: (title, date, emoji) => fetch('/api/reminders', body({ title, date, emoji })).then(j),
+  removeReminder: (id) => fetch(`/api/reminders/${id}`, { method: 'DELETE' }).then(j),
+  setTheme: (accent) => fetch('/api/theme', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accent }) }).then(j),
+  onThisDay: () => fetch('/api/onthisday').then(j),
 };

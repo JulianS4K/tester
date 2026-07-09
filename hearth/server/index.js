@@ -5,6 +5,7 @@ import { store } from './store.js';
 import { getEvents, clearCache } from './calendar.js';
 import { getWeather } from './weather.js';
 import { getNews, clearNewsCache } from './news.js';
+import { getOnThisDay } from './onthisday.js';
 
 const app = express();
 app.use(express.json());
@@ -79,6 +80,16 @@ app.delete('/api/news/:id', (req, res) => { store.removeNewsFeed(req.params.id);
 
 // ---- Notes ----
 app.put('/api/notes', (req, res) => res.json({ notes: store.setNotes(req.body?.notes) }));
+
+// ---- Reminders / countdowns ----
+app.post('/api/reminders', (req, res) => res.json(store.addReminder(req.body?.title, req.body?.date, req.body?.emoji)));
+app.delete('/api/reminders/:id', (req, res) => { store.removeReminder(req.params.id); res.json({ ok: true }); });
+
+// ---- Theme ----
+app.put('/api/theme', (req, res) => res.json(store.setTheme(req.body?.accent)));
+
+// ---- On This Day (Wikipedia, no key) ----
+app.get('/api/onthisday', wrap(async (req, res) => res.json({ items: await getOnThisDay() })));
 
 // ---- Photos (slideshow) ----
 app.get('/api/photos', (req, res) => {

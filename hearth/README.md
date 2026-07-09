@@ -25,6 +25,10 @@ tonight's dinner, photos, notes — each tapping through to its full view.
   iCloud, Outlook, Cozi, school/sports…), each **color-coded per person**. Month
   grid + an **Up Next** agenda. Recurring events are expanded correctly.
 - **📰 News** — aggregate any **RSS/Atom** feeds (free, no API key); merged, newest first.
+- **⏳ Countdowns & reminders** — add events ("Mom's birthday", "beach trip"); the
+  **Countdown** tile shows the nearest one ("🏖️ in 5 days").
+- **🗓️ On This Day** — a rotating history fact (Wikipedia, no key).
+- **🎨 Themes** — pick an accent color; the whole board recolors.
 - **🙂 Daily mood check-in** — a prominent **My Mood** tile on the home screen
   (it nudges you if you haven't checked in today); tap to log how you feel, and see
   a **14-day mood trend** to track your own behavior over time.
@@ -45,12 +49,23 @@ tonight's dinner, photos, notes — each tapping through to its full view.
 A Skylight is **$180–$380 + $79/year** for the good features. Hearth is
 **~$50–150 in parts, $0/year**, open, and yours — no account, no lock-in.
 
+## Runs on anything with Node
+
+Hearth is a Node web app + a browser, so the "board" can be **any always-on
+computer hooked to a screen**:
+
+- a **Raspberry Pi** (cheapest, silent, low-power), or
+- a **cheap Windows/Linux mini PC** or an **old laptop** hooked to a **TV over HDMI**.
+
+The display can be a touchscreen **or a regular TV** — with a TV, use a **$15
+wireless mouse / air-remote** (or just edit from your phone at the same URL). No
+code changes either way.
+
 ## Requirements
 
-- Raspberry Pi (3/4/5 or Zero 2 W) with Raspberry Pi OS (desktop).
-- **Node.js 18+** (`sudo apt install nodejs npm`).
-- A touchscreen (official Pi display, or any HDMI touch monitor).
-- Chromium (`sudo apt install chromium-browser`) for the kiosk.
+- **Node.js 18+** (nodejs.org, or `sudo apt install nodejs npm` on a Pi).
+- A screen: touchscreen, or a TV + a wireless mouse/air-remote.
+- A browser for kiosk mode: **Chromium** (Pi/Linux) or **Edge/Chrome** (Windows).
 
 ## Setup
 
@@ -73,7 +88,22 @@ Open `http://<pi-ip>:8080`, tap **⚙ Settings**, and paste your calendars' **se
 - **Outlook / Microsoft 365:** Calendar → Share → **Publish** → copy the **ICS** link.
 - **Cozi / school / sports sites:** look for a "Subscribe / iCal / ICS" export.
 
-### Run fullscreen on boot
+### Run on Windows (mini PC / laptop → TV)
+
+```bat
+cd hearth
+npm install
+scripts\start.bat          REM just the server (http://localhost:8080)
+REM …or fullscreen on the TV in one go (starts server + Edge kiosk):
+scripts\kiosk.bat
+```
+
+Interact with a **wireless mouse / air-remote** on the TV, or from your **phone**
+at `http://<pc-ip>:8080`. To launch on login, drop a shortcut to `kiosk.bat` in
+the Startup folder (`Win+R` → `shell:startup`), or use Task Scheduler "At log on".
+Exit kiosk with `Alt+F4`.
+
+### Run fullscreen on boot (Raspberry Pi / Linux)
 
 ```bash
 # server on boot
