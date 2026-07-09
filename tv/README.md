@@ -95,6 +95,22 @@ Alternatively pass them as Gradle properties (`-Ptrakt.clientId=…`) or the
 app still launches and shows an "API key not configured" notice (public browsing
 needs at least a `clientId`; sign-in needs both).
 
+### Optional: TMDB key for "Available on <service>"
+
+To show real streaming availability on the detail page ("Available on Netflix ·
+Prime", JustWatch-powered), add a **free** TMDB v3 API key
+(<https://www.themoviedb.org/settings/api>, Developer plan) to `local.properties`:
+
+```properties
+tmdb.apiKey=YOUR_TMDB_V3_KEY
+tmdb.region=US        # optional; ISO country for availability, defaults to US
+```
+
+Without it, the detail page just omits the "Available on" block — everything else
+works. Availability data is provided by **JustWatch** (attributed in-app) and links
+out to the TMDB/JustWatch watch page; it identifies *which* services carry a title,
+not a deep-link into the exact title inside each app.
+
 ## Build & install
 
 **Requirements:** Android Studio (Koala+), JDK 17, Android SDK 35.

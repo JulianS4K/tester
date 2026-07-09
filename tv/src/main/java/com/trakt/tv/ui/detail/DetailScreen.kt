@@ -3,6 +3,7 @@
 package com.trakt.tv.ui.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -52,6 +54,8 @@ import com.trakt.tv.data.model.Episode
 import com.trakt.tv.data.model.MediaItem
 import com.trakt.tv.data.model.MediaType
 import com.trakt.tv.data.model.Season
+import com.trakt.tv.data.model.WatchAvailability
+import com.trakt.tv.data.model.WatchProvider
 import com.trakt.tv.ui.UiState
 import com.trakt.tv.ui.appContainer
 import com.trakt.tv.ui.components.LoadingView
@@ -76,6 +80,7 @@ data class DetailUi(
     val cast: List<CastItem> = emptyList(),
     val seasons: List<Season> = emptyList(),
     val upNext: Episode? = null,
+    val availability: WatchAvailability? = null,
 )
 
 class DetailViewModel(
@@ -109,7 +114,10 @@ class DetailViewModel(
                     val progress = async {
                         if (type == MediaType.SHOW) repo.watchedProgress(id)?.nextEpisode else null
                     }
-                    DetailUi(detail.await(), related.await(), cast.await(), seasons.await(), progress.await())
+                    val detailItem = detail.await()
+                    // "Available on" needs the summary's tmdb id, so it runs after detail.
+                    val availability = runCatching { repo.watchProviders(detailItem) }.getOrNull()
+                    DetailUi(detailItem, related.await(), cast.await(), seasons.await(), progress.await(), availability)
                 }
             }.fold(
                 onSuccess = { UiState.Success(it) },
@@ -241,7 +249,7 @@ private fun DetailContent(
                         )
                     }
                     Spacer(Modifier.height(24.dp))
-                    WatchSection(item)
+                    WatchSection(item, ui.availability)
                     Spacer(Modifier.height(24.dp))
                     Text(
                         "Track",
@@ -341,7 +349,7 @@ private fun SeasonsRow(seasons: List<Season>, onSeason: (Int) -> Unit) {
 }
 
 @Composable
-private fun WatchSection(item: MediaItem) {
+private fun WatchSection(item: MediaItem, availability: WatchAvailability?) {
     val context = LocalContext.current
     val installed = remember(item.traktId) { WatchLauncher.installedProviders(context) }
     val canSearch = remember { WatchLauncher.canWebSearch(context) }
@@ -351,6 +359,12 @@ private fun WatchSection(item: MediaItem) {
         add("Trakt" to WatchLinks.traktUrl(item))
         WatchLinks.imdbUrl(item)?.let { add("IMDb" to it) }
         WatchLinks.tmdbUrl(item)?.let { add("TMDB" to it) }
+    }
+
+    // "Available on" — real streaming availability (TMDB / JustWatch), when a key is set.
+    if (availability != null) {
+        AvailabilityBlock(availability, onOpenLink = { url -> WatchLauncher.openUrl(context, url) })
+        Spacer(Modifier.height(20.dp))
     }
 
     Text(
@@ -394,6 +408,54 @@ private fun WatchSection(item: MediaItem) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AvailabilityBlock(availability: WatchAvailability, onOpenLink: (String) -> Unit) {
+    val link = availability.tmdbLink
+    val stream = availability.flatrate
+    val other = (availability.rent + availability.buy).distinctBy { it.name }
+
+    Text(
+        "Available on",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(10.dp))
+    if (stream.isNotEmpty()) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            stream.forEach { p -> ProviderChip(p, enabled = link != null) { link?.let(onOpenLink) } }
+        }
+    }
+    if (other.isNotEmpty()) {
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "Rent or buy: " + other.joinToString(", ") { it.name },
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    Spacer(Modifier.height(8.dp))
+    Text(
+        "Data provided by JustWatch",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun ProviderChip(provider: WatchProvider, enabled: Boolean, onClick: () -> Unit) {
+    Button(onClick = onClick, enabled = enabled) {
+        if (provider.logoUrl != null) {
+            AsyncImage(
+                model = provider.logoUrl,
+                contentDescription = provider.name,
+                modifier = Modifier.size(24.dp).clip(RoundedCornerShape(4.dp)),
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+        Text(provider.name)
     }
 }
 
