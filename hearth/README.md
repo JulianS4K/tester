@@ -1,10 +1,12 @@
-# 🔥 Hearth — a DIY family calendar board
+# 🔥 Hearth — a DIY family dashboard board
 
-A self-hosted, wall-mounted **family calendar & organizer** for a Raspberry Pi +
-touchscreen — a DIY take on the Skylight Calendar. A small Node server merges your
-**ICS calendar feeds**, and a **touch-first web UI** (shown fullscreen in Chromium)
-gives you a shared month calendar, chores, lists, meal plan, weather, and a photo
-screensaver. **No subscription, no cloud, your data stays on the Pi.**
+A self-hosted, wall-mounted **family dashboard** for a Raspberry Pi + touchscreen —
+think **Windows Live Tiles, but cooler and DIY-coded** (and a spiritual cousin of a
+Skylight Calendar). A small Node server merges your **ICS calendar feeds** + **RSS
+news**, and a **touch-first web UI** (fullscreen Chromium) opens on a grid of
+**animated, self-updating tiles** — weather, next event, headlines, chores, health,
+tonight's dinner, photos, notes — each tapping through to its full view.
+**No subscription, no cloud, your data stays on the Pi.**
 
 ```
 ┌───────────────────────┐        ┌──────────────────────────┐
@@ -16,14 +18,20 @@ screensaver. **No subscription, no cloud, your data stays on the Pi.**
 
 ## Features
 
+- **🟦 Live Tiles home** — an animated grid of self-updating tiles (clock, weather,
+  next event, rotating headlines, chores/health progress, tonight's dinner, a
+  rotating photo, notes). Tiles flip as they refresh; tap one to open its full view.
 - **📅 Merged calendar** — subscribe to any number of **.ics** feeds (Google,
   iCloud, Outlook, Cozi, school/sports…), each **color-coded per person**. Month
   grid + an **Up Next** agenda. Recurring events are expanded correctly.
+- **📰 News** — aggregate any **RSS/Atom** feeds (free, no API key); merged, newest first.
+- **❤️ Health & Habits** — per-person **habits with streaks** (🔥), plus **water**,
+  **mood**, and **weight** logging. Tap to check off.
 - **✅ Chores** — per-person checkable chores, one-tap **Reset all**.
 - **🛒 Lists** — shared to-do / grocery list, **clear done**.
 - **🍽️ Meals** — a simple weekly dinner planner.
+- **📝 Notes** — a shared family sticky note.
 - **🌤️ Weather** — current + 3-day forecast (Open-Meteo, **no API key**).
-- **🕑 Clock & date** header.
 - **🖼️ Photo screensaver** — drops to a photo slideshow after ~90s idle (put images
   in `photos/`).
 - **Touch-first**, works with a mouse too; add anything from your phone by opening

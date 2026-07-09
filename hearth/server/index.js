@@ -4,6 +4,7 @@ import { config } from './config.js';
 import { store } from './store.js';
 import { getEvents, clearCache } from './calendar.js';
 import { getWeather } from './weather.js';
+import { getNews, clearNewsCache } from './news.js';
 
 const app = express();
 app.use(express.json());
@@ -57,6 +58,27 @@ app.post('/api/list/clear-done', (req, res) => { store.clearDone(); res.json({ o
 
 // ---- Meals ----
 app.put('/api/meals/:day', (req, res) => res.json(store.setMeal(req.params.day, req.body?.text)));
+
+// ---- Health ----
+app.post('/api/health/people', (req, res) => res.json(store.addPerson(req.body?.name, req.body?.emoji)));
+app.delete('/api/health/people/:id', (req, res) => { store.removePerson(req.params.id); res.json({ ok: true }); });
+app.post('/api/health/habits', (req, res) => res.json(store.addHabit(req.body?.personId, req.body?.name, req.body?.emoji)));
+app.delete('/api/health/habits/:id', (req, res) => { store.removeHabit(req.params.id); res.json({ ok: true }); });
+app.post('/api/health/habits/:id/toggle', (req, res) => { store.toggleHabit(req.params.id); res.json({ ok: true }); });
+app.post('/api/health/water', (req, res) => res.json(store.incWater(req.body?.personId, Number(req.body?.delta) || 1)));
+app.post('/api/health/metric', (req, res) => res.json(store.setMetric(req.body?.personId, req.body?.key, req.body?.value)));
+
+// ---- News ----
+app.get('/api/news', wrap(async (req, res) => res.json({ items: await getNews() })));
+app.post('/api/news', (req, res) => {
+  const f = store.addNewsFeed(req.body?.name, req.body?.url);
+  clearNewsCache();
+  res.json(f ? { id: f.id, name: f.name } : {});
+});
+app.delete('/api/news/:id', (req, res) => { store.removeNewsFeed(req.params.id); clearNewsCache(); res.json({ ok: true }); });
+
+// ---- Notes ----
+app.put('/api/notes', (req, res) => res.json({ notes: store.setNotes(req.body?.notes) }));
 
 // ---- Photos (slideshow) ----
 app.get('/api/photos', (req, res) => {

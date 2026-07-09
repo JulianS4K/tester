@@ -22,4 +22,21 @@ export const api = {
   clearDone: () => fetch('/api/list/clear-done', { method: 'POST' }).then(j),
 
   setMeal: (day, text) => fetch(`/api/meals/${day}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) }).then(j),
+
+  // Health
+  addPerson: (name, emoji) => fetch('/api/health/people', body({ name, emoji })).then(j),
+  removePerson: (id) => fetch(`/api/health/people/${id}`, { method: 'DELETE' }).then(j),
+  addHabit: (personId, name, emoji) => fetch('/api/health/habits', body({ personId, name, emoji })).then(j),
+  removeHabit: (id) => fetch(`/api/health/habits/${id}`, { method: 'DELETE' }).then(j),
+  toggleHabit: (id) => fetch(`/api/health/habits/${id}/toggle`, { method: 'POST' }).then(j),
+  water: (personId, delta) => fetch('/api/health/water', body({ personId, delta })).then(j),
+  metric: (personId, key, value) => fetch('/api/health/metric', body({ personId, key, value })).then(j),
+
+  // News
+  news: () => fetch('/api/news').then(j),
+  addNews: (name, url) => fetch('/api/news', body({ name, url })).then(j),
+  removeNews: (id) => fetch(`/api/news/${id}`, { method: 'DELETE' }).then(j),
+
+  // Notes
+  setNotes: (notes) => fetch('/api/notes', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notes }) }).then(j),
 };
