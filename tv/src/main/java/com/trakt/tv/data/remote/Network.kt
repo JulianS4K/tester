@@ -53,4 +53,20 @@ class Network(val tokenStore: TokenStore) {
         .addConverterFactory(converter)
         .build()
         .create(TraktApi::class.java)
+
+    // ---- TMDB (optional "Available on <service>" data) ----
+
+    private val tmdbClient: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(TmdbKeyInterceptor())
+        .addInterceptor(logging)
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    val tmdbApi: TmdbApi = Retrofit.Builder()
+        .baseUrl(TmdbConfig.BASE_URL)
+        .client(tmdbClient)
+        .addConverterFactory(converter)
+        .build()
+        .create(TmdbApi::class.java)
 }

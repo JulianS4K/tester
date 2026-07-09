@@ -18,9 +18,13 @@ Android TV** you can make it the default Home app:
   button and pick Trakt TV when the system asks which launcher to use.
 - To revert, choose the original launcher in the same setting.
 
-When set as Home, the **Apps row** (top of the Home screen) launches your installed
-streaming apps, and **Back on the Home screen does nothing** (it won't drop you to a
-blank screen), as a launcher should.
+When set as Home, the **Apps row** (top of the Home screen) lists and launches
+**every app installed on the device** (plus a **Settings** tile), and **Back on the
+Home screen does nothing** (it won't drop you to a blank screen), as a launcher
+should. It's a real launcher, not just an app that opens a fixed set.
+
+To make it the device's Home — from a plain device, a Raspberry Pi running
+Android TV, or baked into your own AOSP/LineageOS ROM — see [`aosp/README.md`](../aosp/README.md).
 
 > ⚠️ **Fire TV** locks its launcher — Amazon doesn't let a third-party app replace
 > the Fire TV home screen. There the app still installs and runs as a normal app
@@ -90,6 +94,22 @@ Alternatively pass them as Gradle properties (`-Ptrakt.clientId=…`) or the
 `TRAKT_CLIENT_ID` / `TRAKT_CLIENT_SECRET` environment variables. Without keys the
 app still launches and shows an "API key not configured" notice (public browsing
 needs at least a `clientId`; sign-in needs both).
+
+### Optional: TMDB key for "Available on <service>"
+
+To show real streaming availability on the detail page ("Available on Netflix ·
+Prime", JustWatch-powered), add a **free** TMDB v3 API key
+(<https://www.themoviedb.org/settings/api>, Developer plan) to `local.properties`:
+
+```properties
+tmdb.apiKey=YOUR_TMDB_V3_KEY
+tmdb.region=US        # optional; ISO country for availability, defaults to US
+```
+
+Without it, the detail page just omits the "Available on" block — everything else
+works. Availability data is provided by **JustWatch** (attributed in-app) and links
+out to the TMDB/JustWatch watch page; it identifies *which* services carry a title,
+not a deep-link into the exact title inside each app.
 
 ## Build & install
 

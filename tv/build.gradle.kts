@@ -37,6 +37,15 @@ android {
 
         buildConfigField("String", "TRAKT_CLIENT_ID", "\"${traktSecret("trakt.clientId", "TRAKT_CLIENT_ID")}\"")
         buildConfigField("String", "TRAKT_CLIENT_SECRET", "\"${traktSecret("trakt.clientSecret", "TRAKT_CLIENT_SECRET")}\"")
+
+        // Optional: TMDB v3 API key enables "Available on <service>" (JustWatch data).
+        // Get a free key at https://www.themoviedb.org/settings/api (Developer plan).
+        buildConfigField("String", "TMDB_API_KEY", "\"${traktSecret("tmdb.apiKey", "TMDB_API_KEY")}\"")
+        buildConfigField(
+            "String",
+            "TMDB_REGION",
+            "\"${(project.findProperty("tmdb.region") as String? ?: System.getenv("TMDB_REGION") ?: "US")}\"",
+        )
     }
 
     buildTypes {

@@ -13,8 +13,11 @@ import com.trakt.tv.data.model.SyncItems
 import com.trakt.tv.data.model.SyncRatings
 import com.trakt.tv.data.model.TraktList
 import com.trakt.tv.data.model.UserStats
+import com.trakt.tv.data.model.WatchAvailability
+import com.trakt.tv.data.model.WatchProvider
 import com.trakt.tv.data.model.WatchedProgress
 import com.trakt.tv.data.remote.Network
+import com.trakt.tv.data.remote.TmdbConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -224,6 +227,32 @@ class TraktRepository(private val network: Network) {
         api.listItems(listId).mapNotNull { row ->
             row.movie?.let { MediaItem.from(it) } ?: row.show?.let { MediaItem.from(it) }
         }
+    }
+
+    // ---- Where to watch (TMDB / JustWatch, optional) ----
+
+    private val tmdbApi get() = network.tmdbApi
+
+    suspend fun watchProviders(item: MediaItem): WatchAvailability? = io {
+        val tmdbId = item.ids.tmdb
+        if (tmdbId == null || !TmdbConfig.isConfigured) return@io null
+        val response = runCatching {
+            if (item.type == MediaType.MOVIE) tmdbApi.movieWatchProviders(tmdbId)
+            else tmdbApi.showWatchProviders(tmdbId)
+        }.getOrNull() ?: return@io null
+
+        val country = response.results?.get(TmdbConfig.region) ?: return@io null
+        fun map(list: List<com.trakt.tv.data.model.TmdbProvider>?): List<WatchProvider> =
+            list.orEmpty()
+                .sortedBy { it.displayPriority ?: Int.MAX_VALUE }
+                .mapNotNull { p -> p.providerName?.let { WatchProvider(it, TmdbConfig.logoUrl(p.logoPath)) } }
+
+        WatchAvailability(
+            flatrate = map(country.flatrate),
+            rent = map(country.rent),
+            buy = map(country.buy),
+            tmdbLink = country.link,
+        ).takeUnless { it.isEmpty }
     }
 
     // ---- Stats ----
