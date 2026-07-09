@@ -43,4 +43,9 @@ export const config = {
     unit: (process.env.WEATHER_UNIT || 'fahrenheit').toLowerCase(),
   },
   seedFeeds: seedFeeds(),
+  ha: {
+    url: (process.env.HA_URL || '').replace(/\/$/, ''),
+    token: process.env.HA_TOKEN || '',
+    buttons: (() => { try { return JSON.parse(process.env.HA_BUTTONS || '[]'); } catch { console.warn('[config] HA_BUTTONS invalid JSON'); return []; } })(),
+  },
 };

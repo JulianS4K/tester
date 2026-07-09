@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Hearth Remote</title>
+  <style>
+    :root { --bg:#0f1216; --panel:#171b21; --line:#2b3038; --text:#eef1f5; --muted:#9aa4b2; --accent:#4c8dff; }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; padding:16px; }
+    h1 { font-size:20px; margin:4px 0 16px; }
+    h2 { font-size:14px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin:20px 0 10px; }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    button { background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:14px;
+      padding:16px 8px; font-size:16px; }
+    button:active { background:var(--accent); border-color:var(--accent); }
+    .full { grid-column:1/-1; }
+    .muted { color:var(--muted); font-size:13px; }
+    #toast { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:var(--panel);
+      border:1px solid var(--line); padding:10px 18px; border-radius:999px; opacity:0; transition:opacity .2s; }
+    #toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+  <h1>🔥 Hearth Remote</h1>
+
+  <h2>Show on the board</h2>
+  <div class="grid" id="tabs"></div>
+
+  <h2>Board</h2>
+  <div class="grid">
+    <button data-cmd="screensaver">🖼️ Screensaver</button>
+    <button data-cmd="photo">⏭️ Next photo</button>
+    <button data-cmd="reload">🔄 Reload</button>
+  </div>
+
+  <div id="devices-wrap" hidden>
+    <h2>Devices (Home Assistant)</h2>
+    <div class="grid" id="devices"></div>
+  </div>
+  <p class="muted" id="devices-hint" hidden>Add HA_URL / HA_TOKEN / HA_BUTTONS in .env to control lights, Xbox, etc. here.</p>
+
+  <div id="toast"></div>
+
+  <script>
+    const TABS = [['home','Home'],['calendar','Calendar'],['chores','Chores'],['list','Lists'],['meals','Meals'],
+      ['health','Health'],['news','News'],['subs','Subs'],['board','Board']];
+    const toast = (t) => { const e=document.getElementById('toast'); e.textContent=t; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),1200); };
+    const cmd = (action, value) => fetch('/api/remote', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action,value}) });
+
+    const tabsEl = document.getElementById('tabs');
+    TABS.forEach(([v,label]) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.onclick = () => { cmd('tab', v); toast('→ ' + label); };
+      tabsEl.appendChild(b);
+    });
+    document.querySelectorAll('[data-cmd]').forEach((b) => b.onclick = () => { cmd(b.dataset.cmd); toast('Sent'); });
+
+    // Home Assistant device buttons (if configured server-side).
+    fetch('/api/ha/config').then(r=>r.json()).then((ha) => {
+      if (!ha.configured || !ha.buttons.length) { document.getElementById('devices-hint').hidden = false; return; }
+      document.getElementById('devices-wrap').hidden = false;
+      const d = document.getElementById('devices');
+      ha.buttons.forEach((btn) => {
+        const el = document.createElement('button');
+        el.textContent = (btn.icon ? btn.icon + ' ' : '') + btn.label;
+        el.onclick = () => fetch('/api/ha/press/' + btn.id, { method:'POST' })
+          .then(r=>r.json()).then((res)=> toast(res.ok ? '✓ ' + btn.label : '✗ failed'));
+        d.appendChild(el);
+      });
+    }).catch(()=>{ document.getElementById('devices-hint').hidden = false; });
+  </script>
+</body>
+</html>

@@ -264,6 +264,22 @@ function startTiles() {
 }
 function clearTiles() { tileTimers.forEach(clearInterval); tileTimers = []; }
 
+// ---------- phone remote (commands from /remote) ----------
+let remoteSince = 0;
+function execRemote(c) {
+  if (c.action === 'tab') { tab = c.value; render(); }
+  else if (c.action === 'screensaver') { showScreensaver(); }
+  else if (c.action === 'photo') { photoIdx++; refreshPhotoTile(); if (!document.getElementById('screensaver').hidden) document.getElementById('ss-img').src = photos[photoIdx % (photos.length || 1)] || ''; }
+  else if (c.action === 'reload') { location.reload(); }
+}
+async function pollRemote() {
+  try {
+    const r = await fetch('/api/remote/poll?since=' + remoteSince).then((x) => x.json());
+    remoteSince = r.seq;
+    (r.commands || []).forEach(execRemote);
+  } catch { /* ignore */ }
+}
+
 // ---------- render: calendar ----------
 function renderCalendarView() {
   view.innerHTML =
@@ -640,6 +656,9 @@ async function boot() {
   setInterval(loadNews, 15 * 60_000);
   setInterval(loadPhotos, 10 * 60_000);
   setInterval(loadOtd, 6 * 60 * 60_000);
+  // Phone remote: skip any commands queued before load, then poll.
+  try { remoteSince = (await fetch('/api/remote/poll?since=0').then((x) => x.json())).seq; } catch { /* ignore */ }
+  setInterval(pollRemote, 1500);
 }
 
 boot();

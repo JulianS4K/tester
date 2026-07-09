@@ -110,8 +110,46 @@ app.get('/api/photos', (req, res) => {
   res.json({ photos: files.map((f) => `/photos/${encodeURIComponent(f)}`) });
 });
 
+// ---- Phone remote: command channel (phone -> wall board) ----
+let remoteSeq = 0;
+const remoteQueue = [];
+app.post('/api/remote', (req, res) => {
+  const { action, value } = req.body || {};
+  remoteSeq += 1;
+  remoteQueue.push({ id: remoteSeq, action, value });
+  while (remoteQueue.length > 50) remoteQueue.shift();
+  res.json({ ok: true, id: remoteSeq });
+});
+app.get('/api/remote/poll', (req, res) => {
+  const since = Number(req.query.since) || 0;
+  res.json({ seq: remoteSeq, commands: remoteQueue.filter((c) => c.id > since) });
+});
+
+// ---- Home Assistant bridge (optional; controls lights, Xbox, media via HA) ----
+app.get('/api/ha/config', (req, res) => {
+  res.json({
+    configured: Boolean(config.ha.url && config.ha.token),
+    buttons: config.ha.buttons.map((b, i) => ({ id: i, label: b.label || `Button ${i + 1}`, icon: b.icon || '' })),
+  });
+});
+app.post('/api/ha/press/:id', wrap(async (req, res) => {
+  const b = config.ha.buttons[Number(req.params.id)];
+  if (!b || !config.ha.url || !config.ha.token) return res.status(400).json({ error: 'not_configured' });
+  const [domain, service] = String(b.service || '').split('.');
+  if (!domain || !service) return res.status(400).json({ error: 'bad_service' });
+  const r = await fetch(`${config.ha.url}/api/services/${domain}/${service}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${config.ha.token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(b.entity ? { entity_id: b.entity } : {}),
+  });
+  res.json({ ok: r.ok });
+}));
+
+// The phone remote page.
+app.get('/remote', (req, res) => res.sendFile('remote.html', { root: config.publicDir }));
+
 // SPA fallback.
-app.get(/^\/(?!api\/|photos\/).*/, (req, res) => res.sendFile('index.html', { root: config.publicDir }));
+app.get(/^\/(?!api\/|photos\/|remote).*/, (req, res) => res.sendFile('index.html', { root: config.publicDir }));
 
 app.listen(config.port, () => {
   console.log(`Hearth family calendar on http://localhost:${config.port}`);

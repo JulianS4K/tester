@@ -42,6 +42,10 @@ tonight's dinner, photos, notes — each tapping through to its full view.
   (it can't auto-cancel — no service allows that — but it tells you exactly when).
 - **📋 Project Board** — a simple Backlog / Doing / Done **Kanban** (move cards with
   ◀ ▶ so it works on a non-touch TV too).
+- **📱 Phone remote** — open **`/remote`** on your phone to drive the wall board
+  (switch tabs, screensaver, next photo) — great for a **non-touch TV**. It also
+  shows **device buttons** (lights, Xbox, media) when a Home Assistant bridge is
+  configured.
 - **📝 Notes** — a shared family sticky note.
 - **🌤️ Weather** — current + 3-day forecast (Open-Meteo, **no API key**).
 - **🖼️ Photo screensaver** — drops to a photo slideshow after ~90s idle (put images
@@ -145,10 +149,17 @@ is best done by delegating device control to a proven local backbone rather than
 hand-coding each brand:
 
 - **Smart lights & media players** → run **Home Assistant** (local, open; integrates
-  Hue/LIFX/Kasa, Sonos/Chromecast, etc.) and have Hearth show/trigger HA entities.
-- **TV input / source switching** (Xbox Series X, consoles) → **HDMI-CEC** from the
-  panel (built into a Pi; a Windows PC needs a ~$50 USB-CEC adapter). Analog consoles
-  (N64) need a composite→HDMI adapter first; deep game control isn't possible.
+  Hue/LIFX/Kasa, Sonos/Chromecast, etc.). Alexa has no good local control API, so put
+  the *control* on HA (your lights usually work with both — keep Alexa for voice).
+  Hearth's phone remote already calls HA via `HA_URL` / `HA_TOKEN` / `HA_BUTTONS`.
+- **Xbox Series X** → the **Home Assistant "Xbox" integration** gives power on/off,
+  current app, playback, and **launch any installed app** (media browser). Add
+  `media_player.turn_on/off` + your `media_player.xbox` entity to `HA_BUTTONS`. For
+  remote power-on, set the console power mode to **Sleep** (instant-on). (Under the
+  hood this is the OpenXbox `xbox-webapi`/SmartGlass protocol.)
+- **TV input / source switching** (Xbox, consoles) → **HDMI-CEC** from the panel
+  (built into a Pi; a Windows PC needs a ~$50 USB-CEC adapter). Analog consoles (N64)
+  need a composite→HDMI adapter first; deep game control isn't possible.
 - **Music** → Apple Music / YouTube Music have no real 3rd-party playback API;
   realistic control is via a Chromecast/Sonos/HA `media_player`.
 - **Auto-cancel subscriptions** → not possible via any API; Hearth does the next best
