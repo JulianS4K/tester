@@ -99,6 +99,8 @@ function render() {
   else if (tab === 'meals') renderMeals();
   else if (tab === 'health') renderHealth();
   else if (tab === 'news') { renderNews(); loadNews(); }
+  else if (tab === 'subs') renderSubs();
+  else if (tab === 'board') renderKanban();
 }
 
 // ---------- render: Live Tiles home ----------
@@ -111,6 +113,9 @@ function renderHome() {
   const choresDone = state.chores.filter((c) => c.done).length;
   const habits = state.health?.habits || [];
   const habitsDone = habits.filter((h) => h.doneToday).length;
+  const monthly = (state.subscriptions || []).filter((s) => !s.paused).reduce((a, s) => a + (s.cost || 0), 0);
+  const subNudge = (state.subscriptions || []).some((s) => subCancelNudge(s));
+  const doing = ((state.kanban && state.kanban.cards) || []).filter((c) => c.col === 'Doing').length;
 
   view.innerHTML = `<div class="tiles">
     ${TILE('wide', '#1f6feb', 'Clock', '<div class="face"><div class="t-main" id="tile-time">--:--</div><div class="t-sub" id="tile-date"></div></div>', 'data-tab="calendar"')}
@@ -123,6 +128,8 @@ function renderHome() {
     ${TILE('', '#e8590c', 'Tonight', `<div class="face"><div class="t-main small">${esc(meal)}</div><div class="t-sub">dinner</div></div>`, 'data-tab="meals"')}
     ${TILE('', '#1c7ed6', 'Lists', `<div class="face"><div class="t-main">${state.list.length}</div><div class="t-sub">items</div></div>`, 'data-tab="list"')}
     ${TILE('', '#0ca678', 'Countdown', '<div class="face" id="tile-countdown"></div>', 'data-action="settings"')}
+    ${TILE(subNudge ? 'nudge' : '', '#7950f2', 'Subs', `<div class="face"><div class="t-main">$${monthly.toFixed(0)}</div><div class="t-sub">/mo${subNudge ? ' · cancel?' : ''}</div></div>`, 'data-tab="subs"')}
+    ${TILE('', '#364fc7', 'Board', `<div class="face"><div class="t-main">${doing}</div><div class="t-sub">in progress</div></div>`, 'data-tab="board"')}
     ${TILE('wide', '#5c7cfa', 'On This Day', '<div class="face" id="tile-otd"></div>')}
     ${TILE('tall photo', '#111', '', '<div class="scrim"></div>', 'id="tile-photo" data-tab="home"')}
     ${TILE('wide', '#495057', 'Notes', '<div class="face"><div class="t-main small" id="tile-notes"></div></div>', 'data-action="notes"')}
@@ -451,6 +458,69 @@ function openNotes() {
   let t;
   area.addEventListener('input', () => { clearTimeout(t); t = setTimeout(async () => { state.notes = area.value; await api.setNotes(area.value); refreshNotesTile(); }, 500); });
   modal.querySelector('#notes-close').onclick = () => { modal.hidden = true; };
+}
+
+// ---------- render: subscriptions ----------
+function subCancelNudge(s) {
+  if (!s.seasonEnd) return null;
+  const end = daysUntil(s.seasonEnd);
+  if (!s.paused && end <= 0) {
+    if (s.returns) { const back = daysUntil(s.returns); if (back > 0) return `Cancel — back in ${back}d`; }
+    return 'Season ended — cancel?';
+  }
+  if (s.paused && s.returns) { const back = daysUntil(s.returns); if (back >= 0 && back <= 10) return `Resubscribe in ${back}d`; }
+  return null;
+}
+function renderSubs() {
+  const subs = state.subscriptions || [];
+  const monthly = subs.filter((s) => !s.paused).reduce((a, s) => a + (s.cost || 0), 0);
+  const rows = subs.map((s) => {
+    const nudge = subCancelNudge(s);
+    return `<div class="row-item ${s.paused ? 'done' : ''}">
+      <span class="label">${esc(s.name)} <span class="muted">$${(s.cost || 0).toFixed(2)}/mo${s.show ? ` · ${esc(s.show)}` : ''}${s.billedVia && s.billedVia !== 'web' ? ` · via ${esc(s.billedVia)}` : ''}</span></span>
+      ${nudge ? `<span class="who" style="background:#c2410c;color:#fff">${esc(nudge)}</span>` : ''}
+      <button class="btn" data-subtoggle="${s.id}">${s.paused ? 'Resume' : 'Pause'}</button>
+      <button class="del" data-subdel="${s.id}">✕</button>
+    </div>`;
+  }).join('') || '<div class="empty">No subscriptions yet.</div>';
+  view.innerHTML = `<div class="panel"><h2>Subscriptions · $${monthly.toFixed(2)}/mo</h2>
+    <p class="muted">Track cost and pause seasonally. Link a show + its season-end / return dates and Hearth nudges you when to cancel and when to resubscribe. (It can't auto-cancel — no service allows that — but it tells you exactly when.)</p>
+    <div class="add-row"><input id="sub-name" placeholder="Name (e.g. Max)" style="max-width:150px" /><input id="sub-cost" type="number" step="0.01" placeholder="$/mo" style="max-width:100px" /><input id="sub-show" placeholder="Show (optional)" /></div>
+    <div class="add-row"><span class="muted">Season ends</span><input id="sub-end" type="date" style="max-width:180px" /><span class="muted">Returns</span><input id="sub-ret" type="date" style="max-width:180px" /><button class="btn accent" id="sub-add">Add</button></div>
+    ${rows}</div>`;
+  view.querySelector('#sub-add').onclick = async () => {
+    const name = view.querySelector('#sub-name').value.trim();
+    if (!name) return;
+    await api.addSub({ name, cost: view.querySelector('#sub-cost').value, show: view.querySelector('#sub-show').value.trim(), seasonEnd: view.querySelector('#sub-end').value, returns: view.querySelector('#sub-ret').value });
+    await loadState();
+  };
+  view.querySelectorAll('[data-subtoggle]').forEach((b) => b.onclick = async () => {
+    const s = (state.subscriptions || []).find((x) => x.id === b.dataset.subtoggle);
+    await api.updateSub(b.dataset.subtoggle, { paused: !s.paused });
+    await loadState();
+  });
+  view.querySelectorAll('[data-subdel]').forEach((b) => b.onclick = async () => { await api.removeSub(b.dataset.subdel); await loadState(); });
+}
+
+// ---------- render: kanban ----------
+function renderKanban() {
+  const kb = state.kanban || { columns: ['Backlog', 'Doing', 'Done'], cards: [] };
+  const cols = kb.columns.map((col, ci) => {
+    const cards = kb.cards.filter((c) => c.col === col).map((c) => {
+      const left = ci > 0 ? `<button class="pill" data-mv="${c.id}|${kb.columns[ci - 1]}">◀</button>` : '';
+      const right = ci < kb.columns.length - 1 ? `<button class="pill" data-mv="${c.id}|${kb.columns[ci + 1]}">▶</button>` : '';
+      return `<div class="kcard"><div class="ktitle">${esc(c.title)}</div><div class="kctrl">${left}${right}<button class="del" data-cdel="${c.id}">✕</button></div></div>`;
+    }).join('');
+    return `<div class="kcol"><h3>${esc(col)} <span class="muted">${kb.cards.filter((c) => c.col === col).length}</span></h3>${cards}</div>`;
+  }).join('');
+  view.innerHTML = `<div class="panel"><h2>Project Board</h2>
+    <div class="add-row"><input id="kb-title" placeholder="New card…" /><button class="btn accent" id="kb-add">Add</button></div>
+    <div class="kboard">${cols}</div></div>`;
+  const add = async () => { const t = view.querySelector('#kb-title').value.trim(); if (!t) return; await api.addCard(t, 'Backlog'); await loadState(); };
+  view.querySelector('#kb-add').onclick = add;
+  view.querySelector('#kb-title').addEventListener('keydown', (e) => { if (e.key === 'Enter') add(); });
+  view.querySelectorAll('[data-mv]').forEach((b) => b.onclick = async () => { const [id, col] = b.dataset.mv.split('|'); await api.moveCard(id, col); await loadState(); });
+  view.querySelectorAll('[data-cdel]').forEach((b) => b.onclick = async () => { await api.removeCard(b.dataset.cdel); await loadState(); });
 }
 
 // ---------- settings modal ----------

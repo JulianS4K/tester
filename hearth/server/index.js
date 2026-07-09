@@ -91,6 +91,16 @@ app.put('/api/theme', (req, res) => res.json(store.setTheme(req.body?.accent)));
 // ---- On This Day (Wikipedia, no key) ----
 app.get('/api/onthisday', wrap(async (req, res) => res.json({ items: await getOnThisDay() })));
 
+// ---- Subscriptions ----
+app.post('/api/subs', (req, res) => res.json(store.addSubscription(req.body || {})));
+app.put('/api/subs/:id', (req, res) => res.json(store.updateSubscription(req.params.id, req.body || {}) || {}));
+app.delete('/api/subs/:id', (req, res) => { store.removeSubscription(req.params.id); res.json({ ok: true }); });
+
+// ---- Kanban ----
+app.post('/api/kanban', (req, res) => res.json(store.addCard(req.body?.title, req.body?.col)));
+app.put('/api/kanban/:id', (req, res) => res.json(store.moveCard(req.params.id, req.body?.col) || {}));
+app.delete('/api/kanban/:id', (req, res) => { store.removeCard(req.params.id); res.json({ ok: true }); });
+
 // ---- Photos (slideshow) ----
 app.get('/api/photos', (req, res) => {
   let files = [];

@@ -45,4 +45,14 @@ export const api = {
   removeReminder: (id) => fetch(`/api/reminders/${id}`, { method: 'DELETE' }).then(j),
   setTheme: (accent) => fetch('/api/theme', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accent }) }).then(j),
   onThisDay: () => fetch('/api/onthisday').then(j),
+
+  // Subscriptions
+  addSub: (s) => fetch('/api/subs', body(s)).then(j),
+  updateSub: (id, patch) => fetch(`/api/subs/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch) }).then(j),
+  removeSub: (id) => fetch(`/api/subs/${id}`, { method: 'DELETE' }).then(j),
+
+  // Kanban
+  addCard: (title, col) => fetch('/api/kanban', body({ title, col })).then(j),
+  moveCard: (id, col) => fetch(`/api/kanban/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ col }) }).then(j),
+  removeCard: (id) => fetch(`/api/kanban/${id}`, { method: 'DELETE' }).then(j),
 };

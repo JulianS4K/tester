@@ -6,6 +6,8 @@ import { config } from './config.js';
 const DEFAULT_COLORS = ['#e5484d', '#2f80ed', '#2f9e44', '#f2994a', '#9b51e0', '#e6a817', '#12b5b0'];
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
+export const KANBAN_COLS = ['Backlog', 'Doing', 'Done'];
+
 const pad2 = (n) => String(n).padStart(2, '0');
 export function todayKey(d = new Date()) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
@@ -34,6 +36,8 @@ class Store {
       notes: '',
       reminders: [],
       theme: { accent: '#4c8dff' },
+      subscriptions: [],
+      kanban: [],
     };
   }
 
@@ -58,6 +62,8 @@ class Store {
     this.data.notes ??= '';
     this.data.reminders ||= [];
     this.data.theme ||= { accent: '#4c8dff' };
+    this.data.subscriptions ||= [];
+    this.data.kanban ||= [];
 
     // Seed feeds from config on first run.
     if (this.data.calendars.length === 0 && config.seedFeeds.length) {
@@ -256,6 +262,49 @@ class Store {
     return this.data.theme;
   }
 
+  // ---- Subscriptions (+ show-based cancel reminders) ----
+  addSubscription(s) {
+    const sub = {
+      id: randomUUID(),
+      name: s.name || 'Subscription',
+      cost: Number(s.cost) || 0,
+      billedVia: s.billedVia || 'web', // web | apple | google
+      show: s.show || '',
+      seasonEnd: s.seasonEnd || '', // YYYY-MM-DD the linked show's season ends
+      returns: s.returns || '', // YYYY-MM-DD it comes back (resubscribe)
+      paused: false,
+    };
+    this.data.subscriptions.push(sub);
+    this.save();
+    return sub;
+  }
+  updateSubscription(id, patch) {
+    const s = this.data.subscriptions.find((x) => x.id === id);
+    if (s) { Object.assign(s, patch); this.save(); }
+    return s;
+  }
+  removeSubscription(id) {
+    this.data.subscriptions = this.data.subscriptions.filter((s) => s.id !== id);
+    this.save();
+  }
+
+  // ---- Kanban ----
+  addCard(title, col = 'Backlog') {
+    const card = { id: randomUUID(), title: title || 'Card', col };
+    this.data.kanban.push(card);
+    this.save();
+    return card;
+  }
+  moveCard(id, col) {
+    const c = this.data.kanban.find((x) => x.id === id);
+    if (c && KANBAN_COLS.includes(col)) { c.col = col; this.save(); }
+    return c;
+  }
+  removeCard(id) {
+    this.data.kanban = this.data.kanban.filter((c) => c.id !== id);
+    this.save();
+  }
+
   // Public snapshot (calendar/news urls stripped — the browser never needs them).
   snapshot() {
     const today = todayKey();
@@ -275,6 +324,8 @@ class Store {
       notes: this.data.notes,
       reminders: [...this.data.reminders].sort((a, b) => a.date.localeCompare(b.date)),
       theme: this.data.theme,
+      subscriptions: this.data.subscriptions,
+      kanban: { columns: KANBAN_COLS, cards: this.data.kanban },
     };
   }
 }
