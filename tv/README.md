@@ -18,9 +18,13 @@ Android TV** you can make it the default Home app:
   button and pick Trakt TV when the system asks which launcher to use.
 - To revert, choose the original launcher in the same setting.
 
-When set as Home, the **Apps row** (top of the Home screen) launches your installed
-streaming apps, and **Back on the Home screen does nothing** (it won't drop you to a
-blank screen), as a launcher should.
+When set as Home, the **Apps row** (top of the Home screen) lists and launches
+**every app installed on the device** (plus a **Settings** tile), and **Back on the
+Home screen does nothing** (it won't drop you to a blank screen), as a launcher
+should. It's a real launcher, not just an app that opens a fixed set.
+
+To make it the device's Home — from a plain device, a Raspberry Pi running
+Android TV, or baked into your own AOSP/LineageOS ROM — see [`aosp/README.md`](../aosp/README.md).
 
 > ⚠️ **Fire TV** locks its launcher — Amazon doesn't let a third-party app replace
 > the Fire TV home screen. There the app still installs and runs as a normal app

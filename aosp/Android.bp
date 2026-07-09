@@ -1,0 +1,25 @@
+// Soong module to preinstall Trakt TV as a system app in an AOSP / LineageOS build.
+// Place this (and prebuilt/TraktTvLauncher.apk) under your device tree, e.g.
+//   device/<vendor>/<board>/apps/TraktTvLauncher/
+// then add `PRODUCT_PACKAGES += TraktTvLauncher` to the product makefile.
+//
+// See aosp/README.md for the full integration steps.
+
+android_app_import {
+    name: "TraktTvLauncher",
+    apk: "prebuilt/TraktTvLauncher.apk",
+
+    // Use your own release signing. `presigned: true` keeps the APK's existing
+    // signature; switch to `certificate: "platform"` (and privileged: true, under
+    // priv-app) only if you add system-privileged features later.
+    presigned: true,
+    privileged: false,
+
+    // A launcher lives in the product partition on most trees.
+    product_specific: true,
+
+    // Launchers don't need dexpreopt; skip it to shrink the build.
+    dex_preopt: {
+        enabled: false,
+    },
+}

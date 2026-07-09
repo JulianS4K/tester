@@ -4,6 +4,7 @@ package com.trakt.tv.ui.home
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,12 +21,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,13 +53,16 @@ import com.trakt.tv.ui.components.FeaturedHero
 import com.trakt.tv.ui.components.HomeSkeleton
 import com.trakt.tv.ui.components.MediaRow
 import com.trakt.tv.ui.components.MessageView
-import com.trakt.tv.watch.WatchLauncher
+import com.trakt.tv.launcher.LaunchApp
+import com.trakt.tv.launcher.LauncherApps
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class HomeRow(val title: String, val items: List<MediaItem>)
 
@@ -131,8 +137,10 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    // Streaming apps installed on this device — the launcher's "Apps" row.
-    val apps = remember { WatchLauncher.installedProviders(context) }
+    // Every launchable app on this device — the home screen's "Apps" row.
+    val apps by produceState(initialValue = emptyList<LaunchApp>(), context) {
+        value = withContext(Dispatchers.IO) { LauncherApps.installed(context) }
+    }
 
     when (val s = state) {
         is UiState.Loading -> Column(modifier.fillMaxSize()) {
@@ -179,9 +187,9 @@ fun HomeScreen(
     }
 }
 
-/** Launcher-style row of the streaming apps installed on this device. */
+/** Launcher-style row of every launchable app on the device, plus Settings. */
 @Composable
-private fun AppsRow(apps: List<WatchLauncher.Installed>, context: android.content.Context) {
+private fun AppsRow(apps: List<LaunchApp>, context: android.content.Context) {
     Column(Modifier.fillMaxWidth().padding(top = 28.dp)) {
         Text(
             text = "Apps",
@@ -192,10 +200,15 @@ private fun AppsRow(apps: List<WatchLauncher.Installed>, context: android.conten
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 48.dp),
         ) {
-            items(apps, key = { it.provider.id }) { entry ->
+            items(apps, key = { it.packageName }) { app ->
+                AppTile(label = app.label, icon = app.icon, onClick = { LauncherApps.launch(context, app) })
+            }
+            item {
                 AppTile(
-                    label = entry.provider.name,
-                    onClick = { WatchLauncher.launchApp(context, entry.packageName) },
+                    label = "Settings",
+                    icon = null,
+                    fallback = Icons.Filled.Settings,
+                    onClick = { LauncherApps.openSettings(context) },
                 )
             }
         }
@@ -203,7 +216,12 @@ private fun AppsRow(apps: List<WatchLauncher.Installed>, context: android.conten
 }
 
 @Composable
-private fun AppTile(label: String, onClick: () -> Unit) {
+private fun AppTile(
+    label: String,
+    icon: ImageBitmap?,
+    fallback: androidx.compose.ui.graphics.vector.ImageVector = Icons.Filled.Apps,
+    onClick: () -> Unit,
+) {
     Card(
         onClick = onClick,
         modifier = Modifier.width(200.dp),
@@ -217,12 +235,16 @@ private fun AppTile(label: String, onClick: () -> Unit) {
             contentAlignment = Alignment.CenterStart,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(22.dp))
-                Spacer(Modifier.width(10.dp))
+                if (icon != null) {
+                    Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(40.dp))
+                } else {
+                    Icon(fallback, contentDescription = null, modifier = Modifier.size(32.dp))
+                }
+                Spacer(Modifier.width(12.dp))
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
