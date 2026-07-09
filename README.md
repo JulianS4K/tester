@@ -4,6 +4,10 @@
 > - [`pi/`](pi/README.md) — **Trakt TV for Raspberry Pi**: a Node server + web UI you
 >   host on a Pi and show fullscreen on the TV via Chromium kiosk. *(current target)*
 > - [`tv/`](tv/README.md) — **Trakt TV** `:tv` Android TV / Fire TV client (Compose for TV).
+>
+> And a separate DIY project:
+> - [`hearth/`](hearth/README.md) — **Hearth**: a family calendar / organizer wall
+>   board for a Raspberry Pi + touchscreen (a DIY Skylight Calendar). Node + web UI.
 
 # ⚓ Helm — your personal control center
 
