@@ -3,6 +3,7 @@ import { config } from './config.js';
 import { traktFetch, toItem } from './trakt.js';
 import * as auth from './auth.js';
 import { providersFor, openInBrowser } from './watch.js';
+import { fetchGifs } from './reddit.js';
 
 const app = express();
 app.use(express.json());
@@ -131,6 +132,19 @@ app.post('/api/watch/open', wrap(async (req, res) => {
   const url = (req.body?.url || '').toString();
   const opened = await openInBrowser(url);
   res.json({ opened });
+}));
+
+// --- GIF Stream (Reddit) ---
+
+app.get('/api/gifs', wrap(async (req, res) => {
+  const { items, after } = await fetchGifs({
+    subs: (req.query.subs || '').toString() || undefined,
+    sort: (req.query.sort || 'hot').toString(),
+    t: (req.query.t || 'week').toString(),
+    after: (req.query.after || '').toString(),
+    nsfw: req.query.nsfw === '1' || req.query.nsfw === 'true',
+  });
+  res.json({ items, after, subs: config.gifSubs });
 }));
 
 // SPA fallback: any non-API route serves the app shell.

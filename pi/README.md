@@ -27,6 +27,11 @@ fullscreen on the TV with Chromium in kiosk mode and drive it with a remote or k
   title (Netflix, YouTube, Prime, Disney+, Max, Hulu, Apple TV) in the Pi's browser,
   plus Trakt / IMDb / TMDB links. Trakt has no entitlement data, so these are
   best-effort searches — the reliable, Pi-native way to jump toward playback.
+- **GIF Stream** — a lean-back "channel" that turns Reddit's GIF-heavy subreddits
+  into a continuous, auto-advancing, full-bleed stream. Uses Reddit's public
+  read-only listing JSON (no account or API key), prefers each post's MP4 form
+  (smaller, smoother, hardware-decoded) and falls back to a real `.gif`. Buffers
+  ahead, paginates for an endless feed, and skips any clip whose media won't load.
 - **Arrow-key / remote navigation** — custom spatial focus manager; also works with a mouse.
 
 ## Requirements
@@ -83,6 +88,17 @@ EOF
 | Backspace / Back | Go back |
 | Esc | Go back |
 
+### GIF Stream controls
+
+| Key / remote | Action |
+|---|---|
+| ◀ / ▶ | Previous / next clip |
+| Enter / OK / Space / P | Pause & resume |
+| ▲ | Toggle the title/subreddit caption |
+| ▼ | Cycle sort (Hot → Top → New → Rising) |
+| M | Mute / unmute (most clips are silent) |
+| Backspace / Esc | Back to Home |
+
 ## Configuration (env / `.env`)
 
 | Var | Default | Purpose |
@@ -92,6 +108,8 @@ EOF
 | `PORT` | `8730` | Port the interface is served on |
 | `TRAKT_TOKENS_PATH` | `pi/tokens.json` | Where OAuth tokens are cached |
 | `WATCH_OPEN_CMD` | `xdg-open` | Command used to open a streaming web player |
+| `GIF_SUBS` | `gifs+perfectloops+…` | `+`-joined subreddits for the GIF Stream |
+| `REDDIT_USER_AGENT` | `trakt-pi/0.1 (gif-stream)` | User-Agent sent to Reddit |
 
 ## Notes
 

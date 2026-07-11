@@ -9,6 +9,13 @@ export const api = {
   logout: () => fetch('/api/auth/logout', { method: 'POST' }).then(json),
 
   home: () => fetch('/api/home').then(json),
+  gifs: ({ subs = '', sort = 'hot', t = 'week', after = '', nsfw = false } = {}) => {
+    const q = new URLSearchParams({ sort, t });
+    if (subs) q.set('subs', subs);
+    if (after) q.set('after', after);
+    if (nsfw) q.set('nsfw', '1');
+    return fetch('/api/gifs?' + q).then(json);
+  },
   search: (q) => fetch('/api/search?q=' + encodeURIComponent(q)).then(json),
   detail: (type, id) => fetch(`/api/detail?type=${type}&id=${encodeURIComponent(id)}`).then(json),
   library: (which) => fetch('/api/library?which=' + which).then((r) => (r.ok ? r.json() : { items: [] })),

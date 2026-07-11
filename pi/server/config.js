@@ -28,6 +28,9 @@ export const config = {
   port: parseInt(process.env.PORT || '8730', 10),
   tokensPath: process.env.TRAKT_TOKENS_PATH || path.join(root, 'tokens.json'),
   watchOpenCmd: process.env.WATCH_OPEN_CMD || 'xdg-open',
+  // GIF Stream — a lean-back channel of animated posts from Reddit.
+  gifSubs: process.env.GIF_SUBS || 'gifs+perfectloops+oddlysatisfying+aww+reactiongifs+AnimalsBeingDerps+nextfuckinglevel+BetterEveryLoop',
+  redditUserAgent: process.env.REDDIT_USER_AGENT || 'trakt-pi/0.1 (gif-stream; +https://github.com/JulianS4K/tester)',
   publicDir: path.join(root, 'public'),
   isConfigured() {
     return Boolean(this.clientId && this.clientSecret);
