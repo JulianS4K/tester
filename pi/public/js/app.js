@@ -2,13 +2,14 @@ import { api } from './api.js';
 import { Nav } from './nav.js';
 
 const content = document.getElementById('content');
-const ROOTS = ['home', 'search', 'library', 'settings'];
+const ROOTS = ['home', 'search', 'stream', 'library', 'settings'];
 
 let session = { configured: false, signedIn: false, username: null };
 let stack = [{ route: 'home' }];
 let currentRoot = 'home';
 let pollTimer = null;
 let searchTimer = null;
+let teardown = null; // per-screen cleanup (listeners, timers, media) run on navigation
 
 // ---------- helpers ----------
 
@@ -29,6 +30,7 @@ function message(text) { content.innerHTML = `<div class="message">${esc(text)}<
 function clearTimers() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   if (searchTimer) { clearTimeout(searchTimer); searchTimer = null; }
+  if (teardown) { const fn = teardown; teardown = null; try { fn(); } catch { /* ignore */ } }
 }
 
 function setActiveRail() {
@@ -57,6 +59,7 @@ async function render() {
   try {
     if (top.route === 'home') await renderHome();
     else if (top.route === 'search') renderSearch();
+    else if (top.route === 'stream') await renderStream();
     else if (top.route === 'library') await renderLibrary();
     else if (top.route === 'settings') renderSettings();
     else if (top.route === 'signin') await renderSignIn();
@@ -313,6 +316,223 @@ function webLinks(it) {
   if (it.imdb) links.push({ label: 'IMDb', url: `https://www.imdb.com/title/${it.imdb}/` });
   if (it.tmdb) links.push({ label: 'TMDB', url: `https://www.themoviedb.org/${it.type === 'movie' ? 'movie' : 'tv'}/${it.tmdb}` });
   return links;
+}
+
+// ---------- GIF Stream ----------
+// A lean-back channel: fetch animated posts from Reddit and play them one after
+// another, full-bleed, auto-advancing. Arrow keys drive the channel; there are
+// no focusable cards here, so we intercept keys in the capture phase and stop
+// them before nav.js's spatial mover sees them.
+
+const SORTS = ['hot', 'top', 'new', 'rising'];
+const STREAM_MIN_MS = 4000;   // show each clip at least this long…
+const STREAM_MAX_MS = 20000;  // …and at most this long (caps very long loops).
+const STREAM_GIF_MS = 8000;   // hold plain (non-mp4) gifs this long — no duration to read.
+const STREAM_REFILL = 6;      // refetch when this few items remain ahead.
+
+async function renderStream() {
+  content.innerHTML =
+    '<div class="stream" id="stream">' +
+    '  <div class="stream-stage">' +
+    '    <video class="stream-video" id="stream-video" playsinline muted preload="auto"></video>' +
+    '    <img class="stream-img" id="stream-img" alt="" hidden />' +
+    '    <video class="stream-preload" id="stream-preload" muted preload="auto" hidden></video>' +
+    '  </div>' +
+    '  <div class="stream-scrim"></div>' +
+    '  <div class="stream-caption" id="stream-caption"></div>' +
+    '  <div class="stream-badges"><span class="stream-sort" id="stream-sort"></span><span class="stream-count" id="stream-count"></span></div>' +
+    '  <div class="stream-center" id="stream-center"></div>' +
+    '  <div class="stream-help" id="stream-help">' +
+    '    ◀ ▶ prev / next · <b>OK</b> pause · ▲ info · ▼ sort · <b>M</b> sound · <b>Back</b> home' +
+    '  </div>' +
+    '</div>';
+
+  const video = document.getElementById('stream-video');
+  const img = document.getElementById('stream-img');
+  const preload = document.getElementById('stream-preload');
+  const captionEl = document.getElementById('stream-caption');
+  const sortEl = document.getElementById('stream-sort');
+  const countEl = document.getElementById('stream-count');
+  const centerEl = document.getElementById('stream-center');
+  const helpEl = document.getElementById('stream-help');
+
+  const S = {
+    queue: [], seen: new Set(), idx: 0, after: '', sort: 'hot',
+    paused: false, muted: true, fetching: false, done: false,
+    advanceTimer: null, helpTimer: null, alive: true,
+  };
+
+  const clearAdvance = () => { if (S.advanceTimer) { clearTimeout(S.advanceTimer); S.advanceTimer = null; } };
+  const flashCenter = (text) => { centerEl.textContent = text; centerEl.classList.add('show'); };
+  const hideCenter = () => centerEl.classList.remove('show');
+  const nudgeHelp = () => {
+    helpEl.classList.add('show');
+    clearTimeout(S.helpTimer);
+    S.helpTimer = setTimeout(() => helpEl.classList.remove('show'), 3500);
+  };
+
+  async function fetchMore() {
+    if (S.fetching || S.done) return;
+    S.fetching = true;
+    try {
+      const r = await api.gifs({ sort: S.sort, after: S.after });
+      const fresh = (r.items || []).filter((it) => !S.seen.has(it.id));
+      fresh.forEach((it) => S.seen.add(it.id));
+      S.queue.push(...fresh);
+      S.after = r.after || '';
+      if (!S.after) S.done = true; // reached the end of the listing — we'll wrap around
+    } catch (e) {
+      if (!S.queue.length) throw e; // surface only when we have nothing to show
+    } finally {
+      S.fetching = false;
+    }
+  }
+
+  function updateBadges() {
+    sortEl.textContent = S.sort.toUpperCase();
+    const cur = S.queue[S.idx];
+    countEl.textContent = cur ? `r/${cur.subreddit}` : '';
+  }
+
+  function showCaption(item) {
+    const ups = item.ups ? `▲ ${item.ups.toLocaleString()}` : '';
+    captionEl.innerHTML =
+      `<div class="stream-title">${esc(item.title)}</div>` +
+      `<div class="stream-sub">r/${esc(item.subreddit)}${item.author ? ' · u/' + esc(item.author) : ''}${ups ? ' · ' + ups : ''}</div>`;
+    captionEl.classList.add('show');
+  }
+
+  function preloadNext() {
+    const next = S.queue[S.idx + 1];
+    if (next && next.mp4) { preload.src = next.mp4; try { preload.load(); } catch { /* ignore */ } }
+  }
+
+  // Advance after enough whole loops to cover STREAM_MIN_MS, capped at STREAM_MAX_MS.
+  function scheduleAdvanceForVideo() {
+    clearAdvance();
+    if (S.paused) return;
+    const durMs = (video.duration && isFinite(video.duration) ? video.duration : 6) * 1000;
+    const loops = Math.max(1, Math.ceil(STREAM_MIN_MS / durMs));
+    const hold = Math.min(STREAM_MAX_MS, loops * durMs);
+    S.advanceTimer = setTimeout(() => advance(1), hold);
+  }
+
+  async function play() {
+    const item = S.queue[S.idx];
+    if (!item) { flashCenter('Loading…'); await fetchMore().catch(() => {}); if (S.queue[S.idx]) return play(); return; }
+    hideCenter();
+    updateBadges();
+    showCaption(item);
+    clearAdvance();
+
+    if (item.mp4) {
+      img.hidden = true; video.hidden = false;
+      video.loop = true; video.muted = S.muted;
+      video.src = item.mp4;
+      video.play().catch(() => {});
+    } else {
+      // Plain gif — no readable duration, so hold for a fixed spell.
+      video.hidden = true; video.pause(); video.removeAttribute('src'); video.load();
+      img.hidden = false; img.src = item.gif;
+      if (!S.paused) S.advanceTimer = setTimeout(() => advance(1), STREAM_GIF_MS);
+    }
+    preloadNext();
+
+    // Keep the buffer full.
+    if (S.queue.length - S.idx <= STREAM_REFILL) fetchMore().catch(() => {});
+  }
+
+  function advance(dir) {
+    clearAdvance();
+    let next = S.idx + dir;
+    if (next >= S.queue.length) {
+      if (S.done && S.queue.length) next = 0; // wrap the channel rather than dead-ending
+      else { S.idx = S.queue.length; flashCenter('Loading…'); fetchMore().then(play).catch(() => flashCenter('Nothing to stream')); return; }
+    }
+    if (next < 0) next = S.queue.length - 1;
+    S.idx = next;
+    play();
+  }
+
+  function togglePause() {
+    S.paused = !S.paused;
+    if (S.paused) {
+      clearAdvance();
+      video.pause();
+      flashCenter('❚❚');
+    } else {
+      hideCenter();
+      const item = S.queue[S.idx];
+      if (item && item.mp4) { video.play().catch(() => {}); scheduleAdvanceForVideo(); }
+      else if (item) { S.advanceTimer = setTimeout(() => advance(1), STREAM_GIF_MS); }
+    }
+  }
+
+  async function changeSort() {
+    S.sort = SORTS[(SORTS.indexOf(S.sort) + 1) % SORTS.length];
+    S.queue = []; S.seen = new Set(); S.idx = 0; S.after = ''; S.done = false;
+    updateBadges();
+    flashCenter(S.sort.toUpperCase());
+    clearAdvance();
+    try { await fetchMore(); hideCenter(); play(); } catch { flashCenter('Nothing to stream'); }
+  }
+
+  function toggleInfo() {
+    captionEl.classList.toggle('show');
+    nudgeHelp();
+  }
+
+  function toggleMute() {
+    S.muted = !S.muted;
+    video.muted = S.muted;
+    if (!S.muted) video.play().catch(() => {}); // some browsers pause on unmute-during-autoplay
+    flashCenter(S.muted ? '🔇' : '🔊');
+    setTimeout(hideCenter, 900);
+  }
+
+  // A clip whose media 404s/403s: skip it so the channel never stalls.
+  video.addEventListener('error', () => { if (S.alive && S.queue[S.idx] && S.queue[S.idx].mp4) advance(1); });
+  img.addEventListener('error', () => { if (S.alive && S.queue[S.idx] && !S.queue[S.idx].mp4) advance(1); });
+  // Once the video's duration is known, schedule the loop-aware advance.
+  video.addEventListener('loadedmetadata', () => { if (!S.paused && !video.hidden) scheduleAdvanceForVideo(); });
+
+  function onKey(e) {
+    let handled = true;
+    switch (e.key) {
+      case 'ArrowRight': advance(1); break;
+      case 'ArrowLeft': advance(-1); break;
+      case 'ArrowUp': toggleInfo(); break;
+      case 'ArrowDown': changeSort(); break;
+      case 'Enter': case ' ': case 'p': case 'P': togglePause(); break;
+      case 'm': case 'M': toggleMute(); break;
+      case 'Backspace': case 'Escape': go('home'); break;
+      default: handled = false;
+    }
+    if (handled) { e.preventDefault(); e.stopPropagation(); nudgeHelp(); }
+  }
+  // Capture phase so we win over nav.js's window-level (bubble) handler.
+  window.addEventListener('keydown', onKey, true);
+
+  teardown = () => {
+    S.alive = false;
+    clearAdvance();
+    clearTimeout(S.helpTimer);
+    window.removeEventListener('keydown', onKey, true);
+    try { video.pause(); video.removeAttribute('src'); video.load(); } catch { /* ignore */ }
+    try { preload.removeAttribute('src'); } catch { /* ignore */ }
+  };
+
+  nudgeHelp();
+  flashCenter('Loading GIF stream…');
+  try {
+    await fetchMore();
+  } catch (e) {
+    flashCenter('Could not reach Reddit');
+    return;
+  }
+  if (!S.queue.length) { flashCenter('No animated posts found'); return; }
+  hideCenter();
+  play();
 }
 
 // ---------- boot ----------
