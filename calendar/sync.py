@@ -54,7 +54,12 @@ def load_state():
 
 
 def save_state(state):
-    STATE_PATH.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")
+    STATE_PATH.write_text(
+        # ensure_ascii=False keeps accented uids readable in the file and
+        # makes the round-trip stable -- escaping them produces spurious
+        # diffs every time the state is rewritten.
+        json.dumps(state, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    )
 
 
 def store_path(slug):
