@@ -1,0 +1,58 @@
+# Calendar registry. Verified live against list_calendars on 2026-09-09.
+#
+# `role` records what belongs on each calendar so classification stays a
+# written rule rather than a per-event judgment call.
+
+calendars:
+  julian-things:
+    id: juliangrebe@gmail.com
+    name: Julian Things
+    role: >-
+      Primary. Recurring anchors, community reminders, third-place holds,
+      scouting, personal admin.
+
+  pending:
+    id: 13212a4a64593e443e20b6add46269eb84aac770b86b54a5baf1c5eaac185576@group.calendar.google.com
+    name: Pending
+    role: Maybes. Anything not yet ticketed or committed to.
+
+  the-show:
+    id: 8ac2ea72361a3a96ddd3a52919fd7259087d4ecf36ca68dfb2dbe0b6fae65efa@group.calendar.google.com
+    name: The Show
+    role: Confirmed and ticketed only. A thing lands here once it is paid for.
+
+  social:
+    id: d6681210ddaeecb1e93bfda50d7f27593d97d822ad959f0d8fc5f9d3c110d3a8@group.calendar.google.com
+    name: Social
+    role: Weddings, parties, other people's events.
+
+  work:
+    id: ef43f89578f41ad09b137f825eb9371126049e843b91ecab0736500a939db83b@group.calendar.google.com
+    name: Work
+    role: Live-entertainment work.
+
+  getting-there:
+    id: 2777de84f01da1e30049ab3bfc4fcafa895d057b12c49c8b440644ab2f55b49d@group.calendar.google.com
+    name: Getting There
+    role: Travel — flights, trains, transit legs.
+
+  learning:
+    id: 8f694dadc8f49722ca57c0159453d30a1a33ab51396da7be8569c91d05541fff@group.calendar.google.com
+    name: Learning
+    role: Classes and courses (improv levels, workshops).
+
+  wellnessliving:
+    id: 3n6e158jmsn6e4jlidg2tdafkc@group.calendar.google.com
+    name: WellnessLiving
+    role: >-
+      Studio-synced. Yoga (Mon 7:30, Studio Umi) and boxing. Written by the
+      studio's integration — treat as read-only.
+
+  family:
+    id: family13143674949795792990@group.calendar.google.com
+    name: Family
+    role: Family events.
+
+# Deliberately not registered: the two Ticketmaster feeds, the FIFA World Cup
+# Sync2Cal feed, and the holiday calendars. All are externally synced — this
+# store must never push to a calendar something else owns.
