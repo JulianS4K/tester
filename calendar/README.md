@@ -26,8 +26,9 @@ lives in the deterministic half.
 | `events/<slug>.yml` | The events themselves, one file per calendar |
 | `state.json` | `uid` → Google event ID + content hash. **The anti-duplication ledger.** |
 | `sync.py` | Planner |
+| `ingest.py`, `ingest_rules.yml` | Email → calendar classification |
 | `.snapshots/` | Raw `list_events` dumps used for import (gitignored) |
-| `plan.json`, `applied.json` | Build artifacts (gitignored) |
+| `plan.json`, `applied.json`, `proposals.json` | Build artifacts (gitignored) |
 
 ## The loop
 
@@ -83,6 +84,59 @@ python3 calendar/sync.py import <slug> calendar/.snapshots/<slug>.json
 
 Import is idempotent on `uid`, so re-running it refreshes rather than
 duplicates.
+
+## Email ingestion
+
+`ingest.py` reads a JSON dump of email metadata, classifies it against
+`ingest_rules.yml`, and reports which confirmed bookings are missing from the
+calendar. Like `sync.py` it never touches the network.
+
+```bash
+python3 calendar/ingest.py classify calendar/.snapshots/emails.json
+```
+
+### Sender alone is useless
+
+The rules match a sender **and** a subject shape, because the mailbox does not
+separate cleanly by sender:
+
+- `noreply@order.eventbrite.com` + `"Order Confirmation for X"` -> a purchase
+- `noreply@reminder.eventbrite.com` + `"Just added! X"` -> marketing
+- `event@email.eventbrite.com` + `"Get your tickets for X"` -> **also marketing**,
+  an advert to buy, which reads almost identically to a confirmation
+
+Marketing outnumbers purchases roughly 10:1 in this mailbox. Classifying on
+`from:eventbrite.com` would bury the calendar in events that were never bought.
+Anything matching no rule is reported as `unmatched` rather than guessed at, so
+a new vendor surfaces for review instead of being silently dropped.
+
+Two classes exist to prevent specific mistakes:
+
+- **`cancelled`** — ingesting bookings without honouring cancellations leaves
+  ghost events on the calendar.
+- **`work`** — SeatGeek purchases get forwarded to `po@s4kent.com` with a PO
+  number. They are S4K Entertainment buys and never belong on a personal
+  calendar.
+
+### Matching against what already exists
+
+Google **already auto-creates** calendar events from some of these same emails
+(both flights, the Pioneer Works supper clubs, Nightfall, Colin Stetson — each
+carries "This event was created from an email you received in Gmail"). Ingesting
+blind would duplicate exactly the events that are already correct.
+
+Matching therefore uses two keys:
+
+- **Title similarity**, after stripping vendor noise (`tickets`, `order
+  confirmation`, `presents`, …).
+- **Event date**, parsed from the body where the vendor puts it there. A
+  same-day candidate needs only loose title agreement to count as the same
+  booking — vendors and calendars routinely name the same event differently
+  ("Your flight is booked: DCHUHP to Seattle" vs "Flight to Seattle (AS 21)").
+
+Date also decides what is worth reporting: a purchase for a date already gone is
+not a gap in the calendar. Without that filter every past purchase reports as
+missing forever, which trains the reader to ignore the output.
 
 ## Conventions
 
