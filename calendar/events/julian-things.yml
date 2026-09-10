@@ -445,3 +445,21 @@
   reminders:
   - method: popup
     minutes: 0
+- uid: timeleft-coffee-meetup-2026-09-13
+  summary: Timeleft coffee meetup — VERIFY VENUE
+  start: '2026-09-13T13:00:00-04:00'
+  end: '2026-09-13T14:30:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  description: 'Confirmed Timeleft coffee event, booked 2026-09-05. Structured small-group social — the
+    format that works best for you.
+
+    The cafe is only revealed in the Timeleft app on the morning of, hence the reminder and the VERIFY
+    VENUE flag. Check the app before heading out.
+
+    End time is an estimate; Timeleft gives a start only.
+
+    Ingested from email (hello@timeleft.com, "Coffee is Served").'
+  reminders:
+  - method: popup
+    minutes: 240
