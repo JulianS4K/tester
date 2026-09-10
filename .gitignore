@@ -22,3 +22,4 @@ local.properties
 calendar/.snapshots/
 calendar/plan.json
 calendar/applied.json
+calendar/__pycache__/
