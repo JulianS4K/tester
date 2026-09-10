@@ -1,0 +1,52 @@
+# Which role + sections compose into which surface.
+#
+# Sections are listed explicitly rather than globbed. A profile that silently
+# gained a section because someone dropped a file in sections/ is exactly the
+# drift this directory exists to prevent.
+
+profiles:
+  weekly-brief:
+    description: >-
+      The Sunday routine. Everything, including the report structure.
+      Compiled output goes to trigger trig_01XQeFuqeMPvABZuRpqSfN7X.
+    role: weekly-brief
+    sections:
+      - 40-hard-rules
+      - 50-calendars
+      - 10-identity
+      - 20-taste
+      - 30-strategy
+      - 90-report-spec
+      - 60-terminal
+      - 70-known-items
+      - 80-extra-context
+
+  chat:
+    description: >-
+      On-demand surface. Same person, same rules, same data landmines —
+      no report structure, because it answers questions instead of filing.
+    role: chat
+    sections:
+      - 40-hard-rules
+      - 50-calendars
+      - 10-identity
+      - 20-taste
+      - 30-strategy
+      - 60-terminal
+      - 70-known-items
+      - 80-extra-context
+
+  minimal:
+    description: >-
+      Lightweight surface where the full operating manual is overkill.
+      Who he is and what he likes, nothing else.
+    role: minimal
+    sections:
+      - 10-identity
+      - 20-taste
+
+# Sections whose content goes stale and should be reviewed on a cadence,
+# as opposed to the durable ones that only change when Julian does.
+volatile:
+  - 70-known-items
+  - 80-extra-context
