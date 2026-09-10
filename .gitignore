@@ -23,3 +23,4 @@ calendar/.snapshots/
 calendar/plan.json
 calendar/applied.json
 calendar/__pycache__/
+calendar/proposals.json

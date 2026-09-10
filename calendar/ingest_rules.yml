@@ -1,0 +1,109 @@
+# Email → calendar classification rules.
+#
+# The hard lesson from the live mailbox: SENDER ALONE IS USELESS. Eventbrite
+# sends order confirmations AND marketing blasts from adjacent subdomains, and
+# the marketing outnumbers the purchases roughly 10:1. Classifying on
+# "from:eventbrite.com" would bury the calendar in events Julian never bought.
+#
+# So every rule matches a sender AND a subject shape, and anything unmatched
+# is dropped rather than guessed at.
+
+classes:
+  confirmed: >-
+    A purchase or booking actually made. Eligible to become a calendar event,
+    subject to the dedupe pass.
+  cancelled: >-
+    A booking that was called off. Must be honoured -- ingesting bookings
+    without honouring cancellations leaves ghost events on the calendar.
+  promo: >-
+    Marketing. A suggestion at best, never a calendar event. These feed the
+    "worth a look" section of the weekly brief, nothing more.
+  work: >-
+    Bought for S4K Entertainment, not personal. Never belongs on a personal
+    calendar.
+  ignore: Not event-bearing.
+
+rules:
+  # ---- confirmed purchases -------------------------------------------------
+  - sender: noreply@order.eventbrite.com
+    subject_prefix: "Order Confirmation for "
+    class: confirmed
+    title_from: subject_suffix
+
+  - sender: noreply@dice.fm
+    subject_prefix: "Your tickets: "
+    class: confirmed
+    title_from: subject_suffix
+
+  - sender: organization-*@notifications.pools.events
+    subject_prefix: "Your Tickets For "
+    class: confirmed
+    title_from: subject_suffix
+
+  - sender: "*@calendar.luma-mail.com"
+    subject_prefix: "Registration confirmed for "
+    class: confirmed
+    title_from: subject_suffix
+
+  - sender: orders@sofarsounds.com
+    subject_contains: "Order confirmation"
+    class: confirmed
+    title_from: subject
+
+  - sender: reservation@email.alaskaair.com
+    subject_prefix: "Your flight is booked:"
+    class: confirmed
+    title_from: flight
+    calendar: getting-there
+
+  # Timeleft puts the date and time in the body, not the subject, so these
+  # need the body parsed rather than a subject split.
+  - sender: hello@timeleft.com
+    subject_in: ["All Booked 🎉", "Coffee is Served ☕"]
+    class: confirmed
+    title_from: body
+
+  # ---- cancellations -------------------------------------------------------
+  - sender: hello@timeleft.com
+    subject_contains: "Booking has been Canceled"
+    class: cancelled
+
+  # ---- marketing: never auto-add ------------------------------------------
+  # "Just added!" is an org Julian follows announcing a new event. It is a
+  # taste-matched SUGGESTION, not something he holds a ticket to.
+  - sender: noreply@reminder.eventbrite.com
+    class: promo
+  - sender: marketing@plans.eventbrite.com
+    class: promo
+  # Deliberately promo, not confirmed: "Get your tickets for X" is an advert
+  # to buy, which reads almost identically to a confirmation and is the single
+  # easiest way to poison this pipeline.
+  - sender: event@email.eventbrite.com
+    subject_prefix: "Get your tickets for "
+    class: promo
+  - sender: "*@email.axs.com"
+    class: promo
+  - sender: newsletter@fathomentertainment.com
+    class: promo
+  - sender: gigs@mailer.dice.fm
+    class: promo
+
+  # ---- work: never personal ------------------------------------------------
+  # SeatGeek purchases get forwarded to po@s4kent.com with a PO number -- these
+  # are S4K Entertainment buys, not Julian's nights out.
+  - sender: transactions@seatgeek.com
+    class: work
+
+  # ---- not event-bearing ---------------------------------------------------
+  - sender: noreply@dice.fm
+    subject_prefix: "Wait list:"
+    class: ignore          # a waitlist is not a ticket
+  - sender: noreply@dice.fm
+    subject_contains: "See what’s changed"
+    class: ignore          # an update to an event already held
+  - sender: noreply@event.eventbrite.com
+    subject_prefix: "Reminder for "
+    class: ignore          # reminder for a ticket already confirmed elsewhere
+
+# Anything whose sender matches no rule is reported as `unmatched` so new
+# vendors surface for review instead of being silently dropped.
