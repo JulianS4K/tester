@@ -33,6 +33,24 @@ channels:
   supabase:  {status: live, notes: "Terminal feed. Coverage is the problem, not access."}
   zapier:    {status: available, notes: "Eventbrite connector exists: 5 read + 2 search actions."}
   websearch: {status: live, notes: "Manual. Brief-time only, never pipeline."}
+  websearch-scoped:
+    status: live
+    notes: >-
+      WebSearch with allowed_domains pinned to one blocked site. Proven
+      2026-09-22 to pull real facts out of sites WebFetch cannot touch --
+      it returned Sunday League's format and age bracket, and Magnet's day,
+      time, price and prerequisite. It does NOT return listing tables or a
+      current calendar: search serves whatever it has cached, which for
+      Magnet was a term that had already ended. Treat what it returns as
+      durable facts (format, price, night, prerequisite), never as dates.
+  newsletter:
+    status: available
+    notes: >-
+      THE FIX FOR A BLOCKED SITE. A venue that publishes a mailing list turns
+      an unreachable website into a working email source, and the ingest
+      pipeline already parses email. Costs one subscription and no code.
+      Saint Vitus offers one explicitly. Check every blocked site for this
+      before writing it off.
 
 slots:
 
@@ -123,12 +141,12 @@ slots:
           yoga both land here without anyone doing anything. It only reflects
           what is BOOKED -- it cannot propose a new block, which is why both
           expiries (yoga Oct 26, boxing Dec 15) were invisible until queried.
-      - organizer: soccer
-        channel: null
+      - organizer: Sunday League NYC
+        channel: websearch-scoped
         coverage: >-
-          NO SOURCE. meetup.com is blocked, and no organizer in the mailbox
-          runs pickup or league football. This slot has no supply after
-          Dec 15 and nothing is currently capable of filling it.
+          SOURCED 2026-09-22, see `supplied`. Adult coed 30+, Brooklyn,
+          Sundays. This is the slot's answer after boxing ends Dec 15 --
+          but it lands on the rest day, so see the conflict noted there.
 
   spectator-sport:
     target: opportunistic
@@ -155,11 +173,85 @@ slots:
         senders: [noreply@reminder.eventbrite.com]
         coverage: "Book launches, talks, supper clubs."
 
+# Sites Julian supplied 2026-09-22. ALL NINE are EGRESS_BLOCKED to WebFetch --
+# probed individually, no exceptions. They are wired through the channel that
+# does work for each, not dropped.
+supplied:
+  - url: https://magnettheater.com/class/improv-level-two/
+    slot: learning
+    channel: websearch-scoped
+    known: >-
+      Level Two runs MONDAYS 6-8pm, $299; an Intensive alternative runs
+      Mon-Fri 11:30am-3:30pm for one week, $369. Prerequisite is Level One
+      or equivalent. Search only reaches ended terms, so the NEXT term's
+      dates still have to come from Julian or the box office
+      (212-244-8824 / SchoolDirector@MagnetTheater.com).
+    note: >-
+      Two things this settles. The 6-8pm slot DOES collide with yoga at
+      7:30, so Monday is a real either/or. And the Intensive is daytime --
+      it would take no evening at all.
+
+  - url: https://www.sundayleaguenyc.com/
+    slot: physical
+    channel: websearch-scoped
+    known: >-
+      Adult coed 30+ soccer in Brooklyn. Referees, strict kickoff, teams
+      preassigned and rosters reshuffled every two weeks, reserve sub list.
+      Register at /register, limited spots.
+    note: >-
+      Fills the slot that had NO source and outlives boxing's Dec 15 expiry.
+      The rotating roster is the community mechanic STRATEGY asks for --
+      repeated exposure to a changing-but-overlapping group.
+      CONFLICT: it plays SUNDAYS, which the cadence rule names as the
+      default rest day. One of the two has to move.
+
+  - url: https://www.saintvitusbar.com/events
+    slot: live-music
+    channel: newsletter
+    known: "Mailing list offered: 'first to hear about shows'. 1120 Manhattan Ave."
+    note: >-
+      Calendar is JS-rendered, so neither WebFetch nor search reads it.
+      Subscribing routes it into the email pipeline instead. DICE already
+      carries some Vitus shows, so this is depth, not a new lane.
+
+  - url: http://nycmetalscene.com/
+    slot: live-music
+    channel: newsletter
+    note: "Aggregator for exactly his scene. Check for a list or an iCal feed."
+
+  - url: https://restlessnites.com/
+    slot: live-music
+    channel: newsletter
+    note: "Goth/dark/industrial NYC listings. Check for a list or iCal feed."
+
+  - url: https://withfriends.events/
+    slot: live-music
+    channel: newsletter
+    note: "Brooklyn DIY membership platform -- membership implies mail already."
+
+  - url: https://www.sofarsounds.com/
+    slot: live-music
+    channel: gmail
+    status: already-wired
+    note: "orders@sofarsounds.com is already a confirmed-class rule."
+
+  - url: https://www.hitmeupnyc.com/events
+    slot: kink-community
+    channel: gmail
+    status: already-wired
+    note: "Arrives as the 'Hit Me Up' Eventbrite organizer. Site not needed."
+
+  - url: https://www.brooklynartery.com/happenings
+    slot: screen-page
+    channel: gmail
+    status: already-wired
+    note: "Biweekly check reminder already on Julian Things. Walking distance."
+
 # Slots with no working source. Track these -- an empty slot with no source is
 # a different problem from an empty slot with one, and only the second is
 # solved by looking harder.
 unsourced:
-  - slot: physical
-    gap: "Soccer / anything after boxing ends Dec 15."
   - slot: learning
-    gap: "Magnet term dates. Site blocked; needs Julian or a paste."
+    gap: >-
+      Magnet's NEXT term dates. Format, night and price are now known; only
+      the calendar is missing, and no channel here can reach it.
