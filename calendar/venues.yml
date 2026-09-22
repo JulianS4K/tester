@@ -16,15 +16,17 @@ venues:
             "Blackbraid / High Command / Gudsforladt", "Immolation / Ancient Death / Siege Column"]
     note: >-
       His single most-used venue, nearly a third of all tickets, and already
-      named in STRATEGY as the metal third place. The Supabase Terminal feed
-      carries ZERO rows for it -- that gap is now confirmed by purchases,
-      not just by a coverage query.
+      named in STRATEGY as the metal third place. The Terminal feed DOES
+      carry it -- 3 upcoming rows -- correcting an earlier claim of zero
+      that came from the `state` landmine, not from real absence.
 
   - name: Gold Sounds
     address: 44 Wilson Ave, Brooklyn, NY 11237
     tickets: 4
     slot: live-music
-    note: "Also zero rows in Supabase. Same DIY circuit as Vitus."
+    note: >-
+      Genuinely absent from the Terminal feed, re-checked 2026-09-22. DICE
+      mail is the only channel that sees it.
 
   - name: Seventh Heaven Bar & Karaoke
     address: 4 Irving Avenue, Brooklyn, NY 11237
@@ -73,5 +75,6 @@ summary:
   window: 2025-08 to 2026-09
   diy_circuit_share: >-
     16 of 26 tickets are Saint Vitus, Gold Sounds, TV Eye, The Meadows or
-    Purgatory -- the Brooklyn/Queens DIY circuit. No aggregator wired to
-    this system covers it; DICE mail is the only channel that does.
+    Purgatory -- the Brooklyn/Queens DIY circuit. The Terminal feed covers
+    Saint Vitus, TV Eye and The Meadows; Gold Sounds and Purgatory Brooklyn
+    it does not, and DICE mail is the only channel that sees those.

@@ -103,10 +103,24 @@ slots:
       - organizer: Terminal events table
         channel: supabase
         coverage: >-
-          WEAK, measured: 0 rows for Saint Vitus, Gold Sounds, 3 Dollar Bill,
-          Knockdown, Brooklyn Steel; 1 for Webster Hall. Of 728 upcoming NYC
-          rows, 592 have no event_type (Broadway) and 45 are concerts. 2 of
-          12 tracked acts. Do not treat as a discovery source for his scene.
+          RE-MEASURED 2026-09-22 and MUCH BETTER than first reported. Upcoming
+          rows at his venues: Brooklyn Steel 44, Elsewhere 38 (Hall 24 /
+          Rooftop 10 / Zone One 4), Knockdown 26 (+2 Ruins), The Meadows -
+          Brooklyn 9, TV Eye 7, Saint Vitus 3, Industry City 3, Pioneer
+          Works 3, 3 Dollar Bill 2, Market Hotel 2. Metal is present and
+          correctly typed `hard-rock-metal`.
+          THE EARLIER "zero rows" FIGURE WAS AN ARTEFACT OF THE DOCUMENTED
+          LANDMINE: `events.state` is INGEST STATUS (shown/ignored/
+          rescheduled), not a US state, so a `state='NY'` filter returns
+          nothing for every venue and reads as absent coverage. Filter on
+          `venue_name` / `venue_location` instead, and remember
+          `occurs_at_local` is TEXT so compare it as an ISO string.
+        absent: >-
+          Genuinely missing, re-checked: Gold Sounds, Seventh Heaven, Main
+          Drag Music, ALPHAVILLE, Althea's Hideaway, and Purgatory Brooklyn
+          (the only Purgatory row is Atlanta). Hit Me Up is absent too, as
+          expected -- it is a private community, not a ticketed venue, and
+          reaches him by mail.
 
   kink-community:
     target: every 1-2 weeks
