@@ -71,6 +71,16 @@ rules:
   # ---- marketing: never auto-add ------------------------------------------
   # "Just added!" is an org Julian follows announcing a new event. It is a
   # taste-matched SUGGESTION, not something he holds a ticket to.
+  # Routed by ORGANIZER, not sender. Every one of these arrives from the same
+  # address, so sender alone collapses ~200 threads per 90 days into one
+  # undifferentiated pile. The subject carries "... from <organizer>", and
+  # calendar/sources.yml maps that organizer to a cadence slot. Without the
+  # organizer split this stream is a firehose, not a suggestion.
+  - sender: noreply@reminder.eventbrite.com
+    subject_contains: "Just added!"
+    class: promo
+    organizer_from: subject_after_from
+    route_by: sources.yml
   - sender: noreply@reminder.eventbrite.com
     class: promo
   - sender: marketing@plans.eventbrite.com

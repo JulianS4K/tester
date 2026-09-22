@@ -1,0 +1,165 @@
+# Per-slot source registry.
+#
+# Each cadence slot (`persona/sections/35-cadence.md`) needs something that
+# proposes candidates for it. This file records what feeds each one, through
+# which channel, and how good the coverage actually is.
+#
+# THE EGRESS FACT THAT DETERMINES EVERYTHING HERE (probed 2026-09-22):
+# this environment reaches NO event site. bandsintown, songkick, dice.fm,
+# ra.co, ohmyrockness, brooklynvegan, nocleansinging, saintvitusbar,
+# 3dollarbillbk, elsewherebrooklyn, knockdown.center, magnettheater,
+# eventbrite, hitmeupnyc, meetup, espn -- all HTTP 000 via curl and
+# EGRESS_BLOCKED via WebFetch. Only WebSearch and the MCP servers get out.
+#
+# So a source is only real here if it arrives through one of:
+#
+#   gmail      Mail already being delivered. Zero new plumbing, already live.
+#   ical       A feed GOOGLE fetches server-side and this session reads back
+#              via list_events. Egress does not apply -- Google does the
+#              fetching. Already proven by the Ticketmaster + Sync2Cal feeds.
+#   supabase   The Terminal events table. Arena/Broadway only -- see coverage.
+#   zapier     An app connector, where one exists.
+#   websearch  Agent-driven lookup. Works, but cannot be automated into a
+#              snapshot -- it is for the weekly brief, not the pipeline.
+#
+# `organizer` is the string the Eventbrite "Just added!" mail carries in its
+# subject ("... from <organizer>"). That is the routing key: sender alone puts
+# every one of these in one undifferentiated promo pile, which at ~200 threads
+# per 90 days is a firehose rather than a suggestion.
+
+channels:
+  gmail:     {status: live, notes: "Ingest pipeline already parses this."}
+  ical:      {status: available, notes: "Subscribe in Google Calendar; read back via list_events."}
+  supabase:  {status: live, notes: "Terminal feed. Coverage is the problem, not access."}
+  zapier:    {status: available, notes: "Eventbrite connector exists: 5 read + 2 search actions."}
+  websearch: {status: live, notes: "Manual. Brief-time only, never pipeline."}
+
+slots:
+
+  live-music:
+    target: 1-2 per week
+    sources:
+      - organizer: DICE
+        channel: gmail
+        senders: [noreply@dice.fm, gigs@mailer.dice.fm]
+        coverage: >-
+          Genuinely covers his scene -- Saint Vitus, Immolation, Overkill,
+          Cowardice/Oldest Sea all arrived here. This is the strongest
+          concert source he has, and it was overlooked because the Supabase
+          feed was being treated as the only one. Transactional coverage is
+          proven; the gigs@ recommendation stream has not been measured.
+      - organizer: Friends and Lovers
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        coverage: "DJ nights, salsa, dance parties. Brooklyn, Crown Heights."
+      - organizer: Pioneer Works
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        coverage: "Experimental/ambient bills plus talks. Already producing hits."
+      - organizer: AXS
+        channel: gmail
+        senders: ["*@email.axs.com"]
+        coverage: "Mid-size venues. Revocation came from here."
+      - organizer: Ticketmaster
+        channel: ical
+        coverage: "Two feeds already subscribed, both empty in Q4. Arena only."
+      - organizer: Terminal events table
+        channel: supabase
+        coverage: >-
+          WEAK, measured: 0 rows for Saint Vitus, Gold Sounds, 3 Dollar Bill,
+          Knockdown, Brooklyn Steel; 1 for Webster Hall. Of 728 upcoming NYC
+          rows, 592 have no event_type (Broadway) and 45 are concerts. 2 of
+          12 tracked acts. Do not treat as a discovery source for his scene.
+
+  kink-community:
+    target: every 1-2 weeks
+    sources:
+      - organizer: Pagans Paradise
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        coverage: >-
+          Highest-volume single organizer. Parties AND structured formats --
+          Kinky Speed Dating, Poly Connections game night/karaoke. The
+          structured ones matter most: STRATEGY says structured beats open.
+      - organizer: Hit Me Up
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        also_feeds: learning
+        coverage: "HMU Academy classes. He is already vetted and inside."
+      - organizer: Miss Bloom Sex Educator
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        also_feeds: learning
+        coverage: "Workshop-shaped, so it satisfies Learning at no extra night."
+
+  learning:
+    target: weekly (improv), plus workshops riding the kink slot
+    sources:
+      - organizer: Magnet Theater
+        channel: websearch
+        coverage: >-
+          BLOCKED. magnettheater.com refuses both curl and WebFetch, so term
+          dates cannot be read from here. WebSearch returns class pages but
+          not a current schedule. Julian pastes the listing, or it goes
+          unsourced. This is the one slot with no working channel.
+      - organizer: Brooklyn Comedy Collective
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        coverage: >-
+          Improv and sketch shows, high volume. Not classes, but it is the
+          scene improv sits in -- useful for scouting teams and venues.
+      - organizer: Bryant Park Corporation
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        coverage: "Free daytime workshops. Low commitment, low value."
+
+  physical:
+    target: at least 1 per week
+    sources:
+      - organizer: WellnessLiving
+        channel: ical
+        coverage: >-
+          Studio-synced calendar, already live and authoritative. Boxing and
+          yoga both land here without anyone doing anything. It only reflects
+          what is BOOKED -- it cannot propose a new block, which is why both
+          expiries (yoga Oct 26, boxing Dec 15) were invisible until queried.
+      - organizer: soccer
+        channel: null
+        coverage: >-
+          NO SOURCE. meetup.com is blocked, and no organizer in the mailbox
+          runs pickup or league football. This slot has no supply after
+          Dec 15 and nothing is currently capable of filling it.
+
+  spectator-sport:
+    target: opportunistic
+    sources:
+      - organizer: Major League Wrestling
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        coverage: "Only spectator-sport organizer in the mailbox. TV tapings."
+      - organizer: FIFA World Cup 2026 [Sync2Cal]
+        channel: ical
+        coverage: "Subscribed and spent -- the tournament is over. Empty."
+
+  screen-page:
+    target: opportunistic
+    sources:
+      - organizer: Brooklyn Comedy Collective
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+      - organizer: Laughing Lassi Comedy
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+      - organizer: Pioneer Works
+        channel: gmail
+        senders: [noreply@reminder.eventbrite.com]
+        coverage: "Book launches, talks, supper clubs."
+
+# Slots with no working source. Track these -- an empty slot with no source is
+# a different problem from an empty slot with one, and only the second is
+# solved by looking harder.
+unsourced:
+  - slot: physical
+    gap: "Soccer / anything after boxing ends Dec 15."
+  - slot: learning
+    gap: "Magnet term dates. Site blocked; needs Julian or a paste."
