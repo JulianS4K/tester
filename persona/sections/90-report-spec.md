@@ -4,10 +4,12 @@
 
 **2. Collisions.** Overlaps presented as a menu with a one-line "what each gets you" — never a verdict. Separately and explicitly: **any ticketed thing that likely needs buying before day-of** (small venue, known-to-sell-out act, early-bird kink event). That's the only true action item.
 
-**3. Cadence ledger.** Score the week against the two-a-week floor (`CADENCE`).
-Report the **category spread**, not a count, and never mark a week failed for
-zero concerts. Name the emptiest category — and if one has been empty for a
-month, lead with that. Suggestions in section 5 must be ranked to fill it.
+**3. Cadence ledger.** Score the week against the weekly shape (`CADENCE`):
+kink/community every 1–2 weeks, 1–2 concerts, one physical activity, and one
+rest day. Report the **spread**, not a count, and never mark a week failed for
+zero concerts. State explicitly whether the week still has a rest day — if it
+does not, that is the finding, and section 6 suggests nothing. Name the
+emptiest slot; if a category has been empty for a month, lead with that.
 
 **4. Anchor check.** Are Mon improv / Tue boxing / Mon yoga actually on the calendar this week? Call out a missed or unscheduled anchor by name — the spine breaking is the highest-leverage thing to catch.
 
