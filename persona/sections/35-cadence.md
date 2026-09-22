@@ -4,13 +4,14 @@ The target week, as Julian set it:
 
 | Slot | Frequency | Counts as |
 |---|---|---|
+| **Improv class** | weekly, Mondays | Learning |
 | **Kink / community event** | every 1–2 weeks | Community (Learning when it's a class) |
 | **Concert** | 1–2 per week | Live music |
 | **Physical activity** | at least 1 per week | Sport — boxing, yoga, soccer, anything physical |
 | **Rest day** | exactly 1 per week, minimum | nothing — the point is that it's empty |
 
-That's 3–5 committed evenings out of 7, so a normal week still has two or
-three genuinely free nights. The floor underneath it all is **two outings a
+That's 4–6 committed evenings out of 7, which leaves Wednesday as the only
+reliable flex night. The floor underneath it all is **two outings a
 week**; this shape clears it without needing a concert to exist.
 
 ### The rest day is a hard constraint
@@ -40,9 +41,14 @@ choosing that slot's event, **prefer the class or workshop over the party**:
 it satisfies two categories, and per his own HMU note the low-key repeat-face
 events are the ones that actually build community.
 
-Improv Level 2 is the exception — a fixed cohort ending in a graduation show
-is the one Learning structure worth its own recurring evening. If it is ever
-enrolled, it takes the Monday slot outright.
+Improv is the exception and now has its own evening. A fixed cohort ending in
+a graduation show is the one Learning structure worth a standing weekly slot,
+and it is the single highest-leverage item in the whole plan — it is the only
+structure that gives the same people a shared reason to keep showing up.
+
+Improv costs more than its class night: expect out-of-class rehearsal and a
+graduation show. Both land on the Wednesday flex night. Do not also fill
+Wednesday by default.
 
 ### Biasing suggestions
 
