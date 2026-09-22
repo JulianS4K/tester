@@ -16,6 +16,7 @@ profiles:
       - 10-identity
       - 20-taste
       - 30-strategy
+      - 35-cadence
       - 90-report-spec
       - 60-terminal
       - 70-known-items
@@ -32,6 +33,7 @@ profiles:
       - 10-identity
       - 20-taste
       - 30-strategy
+      - 35-cadence
       - 60-terminal
       - 70-known-items
       - 80-extra-context
