@@ -33,6 +33,20 @@ channels:
   supabase:  {status: live, notes: "Terminal feed. Coverage is the problem, not access."}
   zapier:    {status: available, notes: "Eventbrite connector exists: 5 read + 2 search actions."}
   websearch: {status: live, notes: "Manual. Brief-time only, never pipeline."}
+  zapier-get:
+    status: LIVE - THE AUTOMATION CHANNEL
+    notes: >-
+      Webhooks by Zapier "get" takes an arbitrary URL and fetches it from
+      ZAPIER's servers, not ours. Proven 2026-09-22 against sites this
+      sandbox cannot touch: Saint Vitus, Magnet, Sunday League, NYC Metal
+      Scene, HMU and Restless Nites all returned full HTML. The egress wall
+      is therefore NOT the limit -- page rendering is. A server-rendered
+      site is pollable today; a JS-rendered one returns an empty shell no
+      matter who fetches it, and needs its newsletter instead.
+      RSS by Zapier does NOT help: it exposes only a write action here, its
+      feed reader being a trigger that runs inside a Zap.
+      Responses run 50-800KB, so always parse from the saved file.
+
   websearch-scoped:
     status: live
     notes: >-
@@ -180,21 +194,31 @@ supplied:
   - url: https://magnettheater.com/class/improv-level-two/
     slot: learning
     channel: websearch-scoped
+    channel: zapier-get
+    poll: "SERVER-RENDERED. Fully pollable, WordPress, listings in the HTML."
     known: >-
-      Level Two runs MONDAYS 6-8pm, $299; an Intensive alternative runs
-      Mon-Fri 11:30am-3:30pm for one week, $369. Prerequisite is Level One
-      or equivalent. Search only reaches ended terms, so the NEXT term's
-      dates still have to come from Julian or the box office
-      (212-244-8824 / SchoolDirector@MagnetTheater.com).
+      POLLED LIVE 2026-09-22. Level Two sections:
+        - Saturdays 12:30-2:30pm, Oct 10 - Dec 5   <- OPEN, the bookable one
+        - Tuesdays 6-8pm, Sep 1 - Oct 20   (in session, started)
+        - Tuesdays 6-8pm, Sep 15 - Nov 3   (in session, started)
+      Prerequisite is Level One or equivalent. $299 per the class pages.
     note: >-
-      Two things this settles. The 6-8pm slot DOES collide with yoga at
-      7:30, so Monday is a real either/or. And the Intensive is daytime --
-      it would take no evening at all.
+      This retires the Monday assumption entirely -- that came from a
+      cached term that had already ended, and the live page says otherwise.
+      The open section is SATURDAY DAYTIME, which collides with nothing:
+      not yoga (Mon 7:30), not boxing (Tue 7:30), not any evening show.
+      It costs no evening at all, and it ends Dec 5, just before the
+      Dec 20 checkpoint.
 
   - url: https://www.sundayleaguenyc.com/
     slot: physical
-    channel: websearch-scoped
+    channel: zapier-get
+    poll: "SERVER-RENDERED. Pollable."
     known: >-
+      POLLED 2026-09-22: pricing $160 / $180, plus $10 / $20. Dates on the
+      register page read Jan 9, Jan 10, Mar 14, Apr 3 -- which looks like a
+      WINTER/SPRING season, so it may NOT cover the Dec 15 boxing expiry.
+      Verify the current season before counting on it.
       Adult coed 30+ soccer in Brooklyn. Referees, strict kickoff, teams
       preassigned and rosters reshuffled every two weeks, reserve sub list.
       Register at /register, limited spots.
@@ -206,6 +230,8 @@ supplied:
       default rest day. One of the two has to move.
 
   - url: https://www.saintvitusbar.com/events
+    poll: >-
+      JS-RENDERED. Zapier reached it, but the page is an empty shell -- 148KB of markup, zero event data. Newsletter is the only way in.
     slot: live-music
     channel: newsletter
     known: "Mailing list offered: 'first to hear about shows'. 1120 Manhattan Ave."
@@ -215,11 +241,15 @@ supplied:
       carries some Vitus shows, so this is depth, not a new lane.
 
   - url: http://nycmetalscene.com/
+    poll: >-
+      SERVER-RENDERED and pollable. Listings live on sub-pages the nav calls 'Sept-Nov' and 'Dec-2027'. Best automation candidate for the metal slot.
     slot: live-music
     channel: newsletter
     note: "Aggregator for exactly his scene. Check for a list or an iCal feed."
 
   - url: https://restlessnites.com/
+    poll: >-
+      JS-RENDERED. 632KB fetched, 325 chars of text. Has a newsletter with a New York city filter -- use that.
     slot: live-music
     channel: newsletter
     note: "Goth/dark/industrial NYC listings. Check for a list or iCal feed."
@@ -236,6 +266,8 @@ supplied:
     note: "orders@sofarsounds.com is already a confirmed-class rule."
 
   - url: https://www.hitmeupnyc.com/events
+    poll: >-
+      JS-RENDERED. 500KB fetched, 2.3KB of text, no event data. Already arrives by mail anyway.
     slot: kink-community
     channel: gmail
     status: already-wired
