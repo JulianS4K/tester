@@ -74,6 +74,11 @@ slots:
       - organizer: DICE
         channel: gmail
         senders: [noreply@dice.fm, gigs@mailer.dice.fm]
+        indexed: calendar/venues.yml
+        api: >-
+          api.dice.fm returns 403 through Zapier -- it wants client
+          credentials. The ticket MAIL is the working channel, and 26 of
+          them have already been mined into venues.yml.
         coverage: >-
           Genuinely covers his scene -- Saint Vitus, Immolation, Overkill,
           Cowardice/Oldest Sea all arrived here. This is the strongest
