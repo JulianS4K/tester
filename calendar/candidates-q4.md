@@ -88,18 +88,24 @@ convention -- conflict analysis does not belong on a calendar, overlaps
 are a menu to read at the time. The link gets back to the full listing,
 price and address, which prose cannot.
 
-### THREE OF TEN CREATES SILENTLY FAILED
+### Events that disappeared were Julian deleting them
 
-Not a one-off. Unwind yoga, Dynamic Tantric Dance and COS/PLAY A each
-returned a complete success payload with an id, and each was absent
-afterwards -- two of them even appeared in a `list_events` read at 00:11
-and were gone by 00:14, with `update_event` on their ids returning "could
-not be found". All three were recreated and verified.
+Five created events went missing minutes after being written -- Unwind
+yoga, Dynamic Tantric Dance, COS/PLAY A, Seamless Play and Game and Craft
+Night. This was recorded here as a calendar-API defect, with the
+success-response and the read-back both called unreliable. That was wrong.
+Julian was removing them by hand as they appeared, which fits every
+observation exactly and needs no bug to explain it.
 
-**A write to this calendar is not done until a read confirms it.** The
-success response proves nothing, and neither does one subsequent listing.
-Anything that automates calendar writes here needs a read-back step, or
-it will report ten events created and leave seven.
+All five were recreated on the false assumption that writes were failing,
+which put back things he had deliberately removed. They have since been
+deleted again.
+
+**The rule that actually follows:** a missing event is a decision until
+shown otherwise. This calendar has a second author who edits it in real
+time, so absence is evidence about intent, not about the tool. Do not
+re-create a missing event without asking -- re-creating it overrides the
+edit, and does so silently.
 
 ### Already on Pending, found while verifying
 
