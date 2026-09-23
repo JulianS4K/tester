@@ -33,6 +33,39 @@ channels:
   supabase:  {status: live, notes: "Terminal feed. Coverage is the problem, not access."}
   zapier:    {status: available, notes: "Eventbrite connector exists: 5 read + 2 search actions."}
   websearch: {status: live, notes: "Manual. Brief-time only, never pipeline."}
+  ticketsdata:
+    status: "THE PURPOSE-BUILT TOOL — partly gated"
+    notes: >-
+      TicketsData (ticketsdata.com, Terminal-2's `ticketsdata_client.py`) has
+      GET /events taking a `venue_url`, and its own docstring says
+      "Dice.fm venue/promoter pages use venue_url". One credit returns a
+      venue's upcoming events, rendered server-side by TicketsData. It is
+      exactly the venue poller this calendar needs, for both DICE venues and
+      Eventbrite organizers, and it replaces the hand-rolled JSON-LD parsing.
+      Endpoints + cost: /events 1 credit, /fetch 1, /match 12.
+    state:
+      eventbrite: >-
+        ENABLED. Re-enabled 2026-07-08 by operator directive specifically to
+        wire an organizer feed through /events + /fetch (migrations
+        20260708180000 + ...181000). This solves what plain fetching could
+        not: Eventbrite organizer pages are JS-rendered and give up slugs
+        with no dates, and TicketsData returns structured events instead.
+      dice: >-
+        BLOCKED by one operator switch -- `OPERATOR_DISABLED_PLATFORMS`
+        in ticketsdata_client.py, disabled 2026-06-09, so _validate_platform
+        RAISES. Re-enabling is Julian's call as operator, not a code fix.
+      credentials: >-
+        TICKETSDATA_USERNAME / _PASSWORD live in Vault or Terminal-2's env,
+        and are NOT present in this sandbox, which also has no egress to
+        ticketsdata.com. So the call has to run from Terminal-2 or through
+        Zapier with credentials supplied -- it cannot be issued from here.
+      cost: >-
+        Credits are Terminal-2's BUSINESS quota (~39-45k remaining at the
+        last logged call). A venue sweep is 1 credit per venue, so trivial
+        against that, but it is business spend on a personal calendar and
+        should be a deliberate choice rather than a default.
+      pollers_dark: "No ticketsdata_credit_usage row since 2026-09-09."
+
   zapier-get:
     status: LIVE - THE AUTOMATION CHANNEL
     notes: >-
@@ -102,6 +135,16 @@ slots:
         coverage: "Two feeds already subscribed, both empty in Q4. Arena only."
       - organizer: Terminal events table
         channel: supabase
+        ticketsdata_coverage: >-
+          ~ZERO for his venues, measured 2026-09-23. Of upcoming events:
+          Madison Square Garden 3 of 92 carry a td_event_id, Barclays 3
+          active, and Saint Vitus / Gold Sounds / TV Eye / Market Hotel /
+          3 Dollar Bill / Brooklyn Steel / Knockdown / Elsewhere ALL ZERO.
+          Every MSG row is `active:false` with a null last_fetched_at, and
+          all are past events. That is expected rather than broken: those
+          rows come from the RESALE platforms (SH/VD/GT/TP/TM) and Brooklyn
+          DIY venues do not list there -- they sell on DICE only. It is an
+          argument for polling DICE through /events, not for the xref table.
         coverage: >-
           RE-MEASURED 2026-09-22 and MUCH BETTER than first reported. Upcoming
           rows at his venues: Brooklyn Steel 44, Elsewhere 38 (Hall 24 /
