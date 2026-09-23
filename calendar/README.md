@@ -28,6 +28,11 @@ lives in the deterministic half.
 | `sync.py` | Planner |
 | `sources.py` | Source registry — what feeds the store |
 | `ingest.py`, `ingest_rules.yml` | Email → calendar classification |
+| `scheduler.py` | The cycle: gaps → rank → proposals |
+| `cadence.yml` | Machine-readable slot targets + the rest-day ceiling |
+| `tombstones.yml` | **Deletions. Never re-propose these.** |
+| `sources.yml`, `venue_feeds.yml`, `venues.yml` | What feeds each slot, how to poll it, revealed taste |
+| `poll_venues.py` | Parses a fetched DICE venue page |
 | `.snapshots/` | Raw dumps used for import (gitignored) |
 | `plan.json`, `applied.json`, `proposals.json` | Build artifacts (gitignored) |
 
@@ -222,3 +227,54 @@ Carried over from how these calendars are already run:
 The two Ticketmaster feeds, the FIFA World Cup Sync2Cal feed, and the holiday
 calendars are externally synced. They are absent from `calendars.yml` so this
 store can never push to a calendar something else owns.
+
+
+## The scheduler
+
+One cycle, end to end:
+
+```
+sources ──► candidates ──► scheduler.py cycle ──► proposals ──► you ──► sync.py ──► Google
+  mail        ingest.py        gaps + rank          review        plan      agent
+  DICE        poll_venues                                                   applies
+  Terminal    Supabase SQL
+```
+
+`scheduler.py cycle` takes what is already scheduled and a candidate list,
+and writes `scheduler_proposals.json`: a ranked shortlist, the rest held
+back, and everything rejected **with its reason**. It never touches the
+network and never writes to Google — proposals are reviewed, then applied
+through the existing `sync.py` path.
+
+Run `gaps` alone to see coverage without generating anything.
+
+### The rule that shapes it
+
+**The calendar has two authors.** Julian edits it by hand, continuously,
+while this runs. On 2026-09-23 five created events vanished within minutes;
+that was diagnosed as a flaky API and all five were recreated — silently
+putting back things he had deliberately deleted.
+
+So a deletion is durable state. `tombstones.yml` is checked *before* ranking,
+not after, and a tombstoned candidate is **rejected rather than scored low**
+— a low score still surfaces eventually, and a scheduler that re-proposes
+what its user removed does not degrade gracefully. It fights him, and it
+wins, because it never gets bored.
+
+Record one with:
+
+```
+python3 calendar/scheduler.py tombstone "Event Title@2026-10-18"
+```
+
+### Two things that will bite
+
+**Recurring series are collapsed in the store** — one row, not N instances,
+so `sync.py` can never push duplicates. Counting that row once makes a
+weekly anchor look like a one-off, and the scheduler would then propose a
+gym session into every week boxing already covers. The `recurs` block on
+those rows is what `expand_recurring` reads. A `list_events` dump needs no
+annotation, because Google returns instances.
+
+**The rest day is a ceiling, not a preference.** A week with one free day
+left is marked `full` and takes no proposals at all, whatever the gaps say.

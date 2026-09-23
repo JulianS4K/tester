@@ -1,0 +1,26 @@
+# Events Julian deleted by hand. The scheduler will never re-propose these.
+#
+# WHY THIS FILE EXISTS: on 2026-09-23 five events vanished minutes after being
+# created. That was read as a calendar-API defect and all five were recreated
+# -- which silently put back things he had deliberately removed. It was not a
+# defect. He was deleting them as they appeared.
+#
+# The calendar has two authors. A missing event is a DECISION until shown
+# otherwise, so deletions have to be durable state, not an absence the next
+# run re-fills. Google event IDs are useless for this because a re-proposal
+# gets a fresh one; the key is a fingerprint of normalised title + date.
+
+tombstones:
+  - {fingerprint: "unwind stretch and relax yoga|2026-09-28", source: pagans-paradise}
+  - {fingerprint: "dynamic tantric dance release|2026-10-02", source: pagans-paradise}
+  - {fingerprint: "cos play a cosplay kinky party|2026-10-10", source: pagans-paradise}
+  - {fingerprint: "hmu academy seamless play|2026-09-24", source: hmu-newsletter}
+  - {fingerprint: "hmu game and craft night|2026-09-28", source: hmu-newsletter}
+
+# Deleted from Google before this file existed, found by the 2026-09-23 sync.
+# Recorded so a future source poll does not re-propose them either.
+  - {fingerprint: "gorillaz madison square garden|2026-09-29", source: pre-tombstone-sync}
+  - {fingerprint: "revocation defeated sanity fuming mouth weeping tba|2026-10-09", source: pre-tombstone-sync}
+  - {fingerprint: "church street boxing fall brawl thu sep 24|2026-09-24", source: pre-tombstone-sync}
+  - {fingerprint: "dice comics reading soiree brooklyn artery fri sep 25|2026-09-25", source: pre-tombstone-sync}
+  - {fingerprint: "show me the body lip critic jivebomb webster hall|2026-10-15", source: pre-tombstone-sync}

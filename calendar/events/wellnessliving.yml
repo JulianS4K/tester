@@ -13,6 +13,9 @@
     Oct 6, 13, 20, 27, Nov 3, 10, 17, 24, Dec 1, 8, 15.<br><br><a href="https://csboxinggymchelsea.com/gym-info/">https://csboxinggymchelsea.com/gym-info/</a>'
   managed: false
   notes: recurring series -- owned in Google, not pushed from repo
+  recurs:
+    freq: weekly
+    until: '2026-12-15'
 - uid: yoga-foundations
   summary: Yoga Foundations
   start: '2026-10-05T19:30:00-04:00'
@@ -23,3 +26,6 @@
   description: <a href="https://www.studioumi.nyc/">https://www.studioumi.nyc/</a>
   managed: false
   notes: recurring series -- owned in Google, not pushed from repo
+  recurs:
+    freq: weekly
+    until: '2026-10-26'

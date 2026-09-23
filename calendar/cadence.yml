@@ -1,0 +1,26 @@
+# Machine-readable cadence targets.
+#
+# The prose twin is `persona/sections/35-cadence.md`, which the weekly brief
+# reads and which carries the reasoning. THIS file is what the scheduler
+# computes against. Keep the numbers here and the argument there; if they
+# ever disagree, this file is what actually runs.
+
+week_starts_on: monday
+
+slots:
+  physical:       {min_per_week: 1, target_per_week: 1}
+  live-music:     {min_per_week: 0, target_per_week: 2, max_per_week: 2}
+  kink-community: {min_per_week: 0, target_per_week: 1, every_n_weeks: 2}
+  learning:       {min_per_week: 0, target_per_week: 1}
+  screen-page:    {min_per_week: 0, target_per_week: 0}
+  spectator-sport: {min_per_week: 0, target_per_week: 0}
+
+# The one ceiling. A week must keep a day with nothing on it. The scheduler
+# refuses to propose into the last free day rather than ranking it low.
+rest_day:
+  required: true
+  default: sunday
+  floats: true
+
+floor:
+  outings_per_week: 2
