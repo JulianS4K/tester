@@ -1,0 +1,44 @@
+# Venue -> pollable feed. Slugs resolved 2026-09-22 via domain-scoped WebSearch.
+#
+# DICE venue pages embed a JSON-LD Event list, so ONE fetch per venue returns
+# the whole calendar with names and start times. That makes DICE the primary
+# poll for live music.
+#
+# Eventbrite organizer pages do NOT: they are JS-rendered and yield only event
+# slugs, with dates requiring a second fetch per event. The "Just added!" mail
+# already carries name, date and organizer in a single message, so mail stays
+# the Eventbrite channel and the organizer page is backfill for what mail
+# missed -- never the primary.
+
+dice:
+  saint-vitus:
+    slug: saint-vitus-rgrv
+    url: https://dice.fm/venue/saint-vitus-rgrv
+    polled: {at: 2026-09-22, events: 30}
+    note: "Terminal carries 3 for the same window. DICE returns 30."
+  gold-sounds:
+    slug: gold-sounds-y3qr
+    url: https://dice.fm/venue/gold-sounds-y3qr
+    polled: {at: 2026-09-22, events: 19}
+    note: >-
+      His #2 venue and ABSENT from the Terminal feed entirely. DICE polling
+      covers exactly the gap Terminal cannot.
+  # Slugs still to resolve -- same WebSearch pattern, allowed_domains=dice.fm
+  tv-eye:        {slug: null, terminal_rows: 7}
+  the-meadows:   {slug: null, terminal_rows: 9}
+  market-hotel:  {slug: null, terminal_rows: 2}
+  purgatory:     {slug: null, terminal_rows: 0, note: "Terminal's only Purgatory is Atlanta."}
+  seventh-heaven:{slug: null, terminal_rows: 0, note: "Screen-page slot's real home."}
+  main-drag:     {slug: null, terminal_rows: 0}
+  alphaville:    {slug: null, terminal_rows: 0}
+
+eventbrite:
+  hit-me-up:
+    organizer_id: 69189357793
+    url: https://www.eventbrite.com/o/hit-me-up-69189357793
+    polled: {at: 2026-09-22, events: 0, slugs: 11}
+    note: >-
+      JS-rendered. 11 event slugs recoverable from links, zero dates. Use the
+      mail stream; poll only to catch what mail missed.
+  pagans-paradise: {organizer_id: null}
+  miss-bloom:      {organizer_id: null}
