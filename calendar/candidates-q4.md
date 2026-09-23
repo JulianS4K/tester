@@ -162,7 +162,13 @@ The cadence concern stands and is his to weigh: October now holds eighteen
 kink/community entries against a rule of one every week or two, so this is
 a menu to cut down, not a schedule to work through.
 
-**They are all-day entries tagged VERIFY TIME.** The newsletter publishes
+**Converted to 7pm starts on Julian's instruction, still tagged VERIFY
+TIME.** Durations follow each format's own history rather than one blanket
+block: Academy classes 7-9pm, jams, mixers and socials 7-10pm, All Hallows
+Tease 7-11pm. Naked Wrestling carries a lower-confidence note, being the
+one Sunday class in the set and the format that has run at 11am before.
+
+Originally entered all-day, because: The newsletter publishes
 dates only, and none of the twelve has an Eventbrite announcement in the
 inbox yet — the newsletter runs ahead of the mail. HMU's times genuinely
 vary by format (Academy classes 7-9pm, mixers to 11pm or later, Book Swap
