@@ -108,3 +108,55 @@ change the November picture: The Immortal Ball (Sat Oct 17, Masquerade),
 Clayface film (Oct 24), **She Wants Revenge + Rosegarden Funeral Party
 (Mon Nov 2, Webster Hall)** and **Boy Harsher (Thu Nov 5, Knockdown)**.
 November is better supplied than earlier notes in this repo claim.
+
+---
+
+## HMU newsletter cross-check, 2026-09-23
+
+Julian supplied HMU's own upcoming-events list. Checked every date against
+the actual weekday; fifteen of seventeen agree, and the two that do not are
+both events already on the calendar.
+
+| | Newsletter says | Actually |
+|---|---|---|
+| Kinky Carnival | Monday, October 18th | **Sunday** Oct 18 |
+| HMU Academy: Florentine Flogging | Tuesday, October 19th | **Monday** Oct 19 |
+
+The Eventbrite "Just added" mail gave Sunday Oct 18 and Monday Oct 19 for
+these, so what is scheduled is right and the newsletter's day names are
+wrong. Two independent sources agreeing on the date is what caught it;
+either one alone would have been trusted.
+
+### Resolves the Kinky Carnival VERIFY
+
+It appears in HMU's own newsletter, so it is an HMU event in NYC, not one
+of Miss Bloom's New Orleans dates. Retitled and given HMU's address; the
+VERIFY VENUE tag is gone.
+
+### Open Loft may be under-scheduled
+
+HMU lists Coworking Open Loft as **every Monday**. The calendar has it
+fortnightly — Oct 12, 26, Nov 9, 23, Dec 7, 21. Either HMU changed
+frequency or the recurrence was set to every other week by mistake; worth
+one look, because it is a standing repeat-context slot and doubling it is
+free.
+
+### PilaTEASE answers the physical gap
+
+"HMU PilaTEASE Classes, ongoing dates" is a recurring physical activity
+inside the community he is already vetted in. That is the physical slot
+and the community slot in one, on an ongoing basis — which is exactly what
+the plan needs after boxing ends Dec 15, and better than Sunday League
+because it does not land on the rest day.
+
+### Not yet scheduled
+
+Sep 24 Seamless Play · Sep 28 Game & Craft Night · Oct 7 Tie Me Down Rope
+Jam · Oct 11 Naked Wrestling · Oct 12 Navigating Play Parties Solo ·
+**Oct 13 BIPOC Speed Dating + Mixer** · Oct 14 Gangbangs · Oct 15 Movie
+Night: Jennifer's Body · Oct 23 All Hallows Tease · Oct 25 Nips & Bits ·
+Oct 27 Embrace Your Kinky Self · Oct 27 FETISH NYC Book Launch.
+
+Deliberately not added wholesale: the cadence rule is one kink/community
+event every one to two weeks, and October already holds six. Adding twelve
+more would be the exact failure the rule exists to prevent.
