@@ -80,12 +80,26 @@ to the NYC ones; only the full body carries the city. Miss Bloom runs both
 markets, so every Miss Bloom event needs its body read before it is
 scheduled. Kinky Carnival is tagged VERIFY VENUE for exactly this reason.
 
-### A create silently failed
+### Descriptions are the source email, nothing else
 
-The first Unwind-yoga create returned a complete success payload, id and
-all, for an event that did not exist -- a follow-up `get_event` on that id
-returned "could not be found". Recreating it worked. **Verify every create
-with a read**; the success response alone does not prove the write landed.
+Each event's description is its Gmail thread link and nothing more. The
+first pass put conflict notes there, which was wrong on Julian's own
+convention -- conflict analysis does not belong on a calendar, overlaps
+are a menu to read at the time. The link gets back to the full listing,
+price and address, which prose cannot.
+
+### THREE OF TEN CREATES SILENTLY FAILED
+
+Not a one-off. Unwind yoga, Dynamic Tantric Dance and COS/PLAY A each
+returned a complete success payload with an id, and each was absent
+afterwards -- two of them even appeared in a `list_events` read at 00:11
+and were gone by 00:14, with `update_event` on their ids returning "could
+not be found". All three were recreated and verified.
+
+**A write to this calendar is not done until a read confirms it.** The
+success response proves nothing, and neither does one subsequent listing.
+Anything that automates calendar writes here needs a read-back step, or
+it will report ten events created and leave seven.
 
 ### Already on Pending, found while verifying
 
