@@ -57,3 +57,40 @@ The kink/community slot was recorded as running dry after Oct 8. It does not:
 there are eleven dated candidates through Nov 11, and the two calendar gaps
 this plan had left — the Nov 9-15 empty week and the slot itself — are both
 answered from mail that had already arrived.
+
+---
+
+## Scheduled 2026-09-23
+
+Ten created on **Pending** (not The Show — none is ticketed). Written with
+`notificationLevel: NONE`, no emojis, VERIFY tags where the mail was silent.
+
+Sep 28 Unwind yoga · Oct 2 Dynamic Tantric Dance · Oct 5 HMU Mean Toys ·
+Oct 6 Art of Nipple Pleasure · Oct 10 COS/PLAY A · Oct 18 Kinky Carnival
+(VERIFY VENUE) · Oct 19 HMU Floggers · Oct 21 Poly Game Night ·
+Oct 28 Kinky Speed Dating · Nov 11 Poly Karaoke.
+
+The eleven source threads were marked read.
+
+### Dropped on inspection
+
+**The Art of Kissing (Nov 3)** is in NEW ORLEANS — "The Twilight Room @ the
+AllWays", 7:30pm **CT**. The announcement subject and snippet look identical
+to the NYC ones; only the full body carries the city. Miss Bloom runs both
+markets, so every Miss Bloom event needs its body read before it is
+scheduled. Kinky Carnival is tagged VERIFY VENUE for exactly this reason.
+
+### A create silently failed
+
+The first Unwind-yoga create returned a complete success payload, id and
+all, for an event that did not exist -- a follow-up `get_event` on that id
+returned "could not be found". Recreating it worked. **Verify every create
+with a read**; the success response alone does not prove the write landed.
+
+### Already on Pending, found while verifying
+
+Not from this sweep and not previously surfaced in this work, but they
+change the November picture: The Immortal Ball (Sat Oct 17, Masquerade),
+Clayface film (Oct 24), **She Wants Revenge + Rosegarden Funeral Party
+(Mon Nov 2, Webster Hall)** and **Boy Harsher (Thu Nov 5, Knockdown)**.
+November is better supplied than earlier notes in this repo claim.
