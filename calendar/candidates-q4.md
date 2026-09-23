@@ -157,6 +157,16 @@ Jam · Oct 11 Naked Wrestling · Oct 12 Navigating Play Parties Solo ·
 Night: Jennifer's Body · Oct 23 All Hallows Tease · Oct 25 Nips & Bits ·
 Oct 27 Embrace Your Kinky Self · Oct 27 FETISH NYC Book Launch.
 
-Deliberately not added wholesale: the cadence rule is one kink/community
-event every one to two weeks, and October already holds six. Adding twelve
-more would be the exact failure the rule exists to prevent.
+All twelve were added on Julian's instruction — he will thin them by hand.
+The cadence concern stands and is his to weigh: October now holds eighteen
+kink/community entries against a rule of one every week or two, so this is
+a menu to cut down, not a schedule to work through.
+
+**They are all-day entries tagged VERIFY TIME.** The newsletter publishes
+dates only, and none of the twelve has an Eventbrite announcement in the
+inbox yet — the newsletter runs ahead of the mail. HMU's times genuinely
+vary by format (Academy classes 7-9pm, mixers to 11pm or later, Book Swap
+6-8pm, and Naked Yoga Flow at 11am on a Sunday), so there is no safe
+default to assume. Each description carries the pattern for its format
+without stating it as the event's time. The times arrive by mail later and
+the ingest pipeline will carry them.
