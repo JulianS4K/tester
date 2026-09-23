@@ -1,3 +1,15 @@
+- uid: mister-sunday-justin-carter-eamon-harkin-nowadays-sun-sep-6--2026-09-06
+  summary: 'Mister Sunday: Justin Carter & Eamon Harkin @ Nowadays (Sun Sep 6, 3pm)'
+  start: '2026-09-06T15:00:00-04:00'
+  end: '2026-09-06T21:00:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: Nowadays, 56-06 Cooper Ave, Ridgewood, NY 11385
+  description: 'Mister Sunday — long-running daytime outdoor dance party with residents Justin Carter
+    and Eamon Harkin. Long Weekend (Labor Day) edition. Warm, communal, all-ages-daytime vibe, great sound,
+    outdoors at Nowadays. Different register from your night stuff — sunlit, social, low-key joyful.
+
+    3-9pm. Nowadays, 56-06 Cooper Ave, Ridgewood.'
 - uid: black-marble-public-circuit-jimmy-cicero-webster-hall-2026-09-10
   summary: Black Marble, Public Circuit, Jimmy Cicero @ Webster Hall
   start: '2026-09-10T20:00:00-04:00'
@@ -64,6 +76,13 @@
   timezone: America/New_York
   all_day: false
   location: 428 Troutman Street, Brooklyn, New York 11237, United States
+- uid: city-of-gods-festival-2026-10-23
+  summary: City of Gods Festival
+  start: '2026-10-23T21:00:00-04:00'
+  end: '2026-10-24T04:00:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: 67 34th Street, Brooklyn, New York 11232, United States
 - uid: mareux-2026-12-07
   summary: Mareux
   start: '2026-12-07T18:00:00-05:00'

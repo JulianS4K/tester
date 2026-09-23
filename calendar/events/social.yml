@@ -7,3 +7,23 @@
   location: Lord Hill Farms 12525 Old Snohomish Monroe Rd Snohomish WA 98290
   description: Reception will start with cocktail hour and light bites, followed by entrance from the
     newlywed couple.
+- uid: traitors-watch-party-w-frank-2026-09-24
+  summary: Traitors watch party w/Frank
+  start: '2026-09-24T19:00:00-04:00'
+  end: '2026-09-24T20:00:00-04:00'
+  timezone: America/New_York
+  all_day: false
+- uid: resident-evil-amc-empire-25-2026-09-28
+  summary: Resident Evil@AMC Empire 25
+  start: '2026-09-28T20:00:00-04:00'
+  end: '2026-09-28T21:29:00-04:00'
+  timezone: America/Los_Angeles
+  all_day: false
+  location: AMC Empire 25, 234 West 42nd St., New York, NY
+  description: Resident Evil@AMC Empire 25
+- uid: timeleft-dinner-2026-09-29
+  summary: Timeleft Dinner
+  start: '2026-09-29T19:00:00-04:00'
+  end: '2026-09-29T21:00:00-04:00'
+  timezone: America/New_York
+  all_day: false

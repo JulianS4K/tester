@@ -1,39 +1,40 @@
-- uid: church-street-boxing-fall-brawl-thu-sep-24-2026-09-24
-  summary: 'Church Street Boxing: Fall Brawl (Thu Sep 24)'
-  start: '2026-09-24T18:30:00-04:00'
-  end: '2026-09-24T22:00:00-04:00'
+- uid: watch-for-tickets-women-s-world-cup-2027-brazil-fifa-sales-e-2026-09-01
+  summary: 'Watch for tickets: Women''s World Cup 2027 Brazil (FIFA sales expected to open ~now)'
+  start: '2026-09-01T10:00:00-04:00'
+  end: '2026-09-01T10:30:00-04:00'
   timezone: America/New_York
   all_day: false
-  location: Church Street Boxing Gym, 25 Park Pl, New York, NY 10007
-  description: 'Church Street Boxing presents Fall Brawl — amateur/smoker boxing card at YOUR gym. You
-    train here (BJJ/boxing), so this is home turf — watching the fights where you work out. 6:30-10pm.
+  description: 'FIFA Women''s World Cup 2027 — Brazil, June–July 2027. First Women''s WC in South America.
 
-    eventbrite.com/e/church-street-boxing-presents-fall-brawl-tickets-1998273512869
 
-    Church Street Boxing Gym, NYC.'
+    WHY THIS DATE: FIFA typically opens ticket sales 9–12 months before a tournament, in phases (lottery/registration
+    first, then general sale). For a June 2027 start, expect the first ticket phase to open around mid-to-late
+    2026. This anchor is set early to start watching.
+
+
+    ACTION:
+
+    - Register interest at fifa.com/tickets now if open
+
+    - Watch FIFA''s official channels for the sales-phase announcement
+
+    - Verify exact host cities + match schedule before booking flights/hotels
+
+    - Decide which cities (Rio, São Paulo, etc.) to base around
+
+
+    Dates and ticket windows are estimates — confirm against fifa.com.'
   reminders:
   - method: popup
-    minutes: 10080
-- uid: dice-comics-reading-soirée-brooklyn-artery-fri-sep-25-2026-09-25
-  summary: DICE Comics Reading Soirée @ Brooklyn Artery (Fri Sep 25)
-  start: '2026-09-25T19:30:00-04:00'
-  end: '2026-09-25T21:30:00-04:00'
+    minutes: 0
+- uid: unwind-stretch-and-relax-yoga-pagans-paradise-2026-09-28
+  summary: 'Unwind: Stretch and Relax Yoga (Pagans Paradise)'
+  start: '2026-09-28T18:30:00-04:00'
+  end: '2026-09-28T20:30:00-04:00'
   timezone: America/New_York
   all_day: false
-  location: Brooklyn Artery, 1004 Cortelyou Rd, Brooklyn, NY 11218
-  description: 'DICE comics reading soirée at Brooklyn Artery — the night-before kickoff to Ditmas Indie
-    Comics Extravaganza. Local comic artists reading their work. This is your Frog Farm register (comics
-    read aloud) but hyperlocal, on Cortelyou. Walking distance.
-
-    Free/donation. Part of DICE weekend (full fair is Sat Sep 26, 12-6pm at Taylor & Co Books + Artery).'
-- uid: gorillaz-2026-09-29
-  summary: Gorillaz @ Madison Square Garden
-  start: '2026-09-29T19:00:00-04:00'
-  end: '2026-09-29T22:00:00-04:00'
-  timezone: America/New_York
-  all_day: false
-  location: Madison Square Garden
-  description: https://www.bandsintown.com/e/108005950
+  location: Near Herald Square, New York NY (address in confirmation)
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1875159102585223949
 - uid: watch-for-tickets-rugby-world-cup-2027-australia-sales-windo-2026-10-01
   summary: 'Watch for tickets: Rugby World Cup 2027 Australia (sales window opening)'
   start: '2026-10-01T10:00:00-04:00'
@@ -75,6 +76,30 @@
   reminders:
   - method: popup
     minutes: 10080
+- uid: dynamic-tantric-dance-release-pagans-paradise-2026-10-02
+  summary: Dynamic Tantric Dance Release (Pagans Paradise)
+  start: '2026-10-02T20:00:00-04:00'
+  end: '2026-10-02T22:30:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: Near Herald Square, New York NY (address in confirmation)
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1875294280713843182
+- uid: hmu-academy-mean-toys-fine-touch-2026-10-05
+  summary: 'HMU Academy: Mean Toys, Fine Touch'
+  start: '2026-10-05T19:00:00-04:00'
+  end: '2026-10-05T21:00:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: 120 Walker St floor 6, New York NY
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1876436581946199642
+- uid: the-art-of-nipple-pleasure-miss-bloom-2026-10-06
+  summary: The Art of Nipple Pleasure (Miss Bloom)
+  start: '2026-10-06T19:00:00-04:00'
+  end: '2026-10-06T21:30:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: 120 Walker St floor 5, New York NY
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1876695152806363952
 - uid: dominant-presence-workshop-w-madame-lilith-taillor-group-ver-2026-10-08
   summary: Dominant Presence workshop w/ Madame Lilith (Taillor Group) — VERIFY DATE
   start: '2026-10-08T19:00:00-04:00'
@@ -108,18 +133,6 @@
   reminders:
   - method: popup
     minutes: 30240
-- uid: revocation-defeated-sanity-fuming-mouth-weeping-tba-2026-10-09
-  summary: Revocation, Defeated Sanity, Fuming Mouth, Weeping @ TBA
-  start: '2026-10-09T19:00:00-04:00'
-  end: '2026-10-09T23:30:00-04:00'
-  timezone: America/New_York
-  all_day: false
-  description: 'Saint Vitus Presents. Technical death metal — Revocation, Defeated Sanity, Fuming Mouth,
-    Weeping.
-
-    Doors 7pm. $29.87
-
-    axs.com/events/1470341/revocation-tickets'
 - uid: clown-cult-cult-cult-halloween-clown-party-3-dollar-bill-sat-2026-10-10
   summary: 'Clown Cult: Cult Cult — Halloween clown party @ 3 Dollar Bill (Sat Oct 10)'
   start: '2026-10-10T19:00:00-04:00'
@@ -147,18 +160,14 @@
   reminders:
   - method: popup
     minutes: 10080
-- uid: show-me-the-body-lip-critic-jivebomb-webster-hall-2026-10-15
-  summary: Show Me The Body, Lip Critic, Jivebomb @ Webster Hall
-  start: '2026-10-15T19:00:00-04:00'
-  end: '2026-10-15T23:00:00-04:00'
+- uid: cos-play-a-cosplay-kinky-party-pagans-paradise-2026-10-10
+  summary: COS/PLAY A Cosplay Kinky Party (Pagans Paradise)
+  start: '2026-10-10T21:00:00-04:00'
+  end: '2026-10-11T03:00:00-04:00'
   timezone: America/New_York
   all_day: false
-  description: 'Saint Vitus Presents. NYC hardcore — Show Me The Body [NO BARRICADE] with Lip Critic and
-    Jivebomb. Visceral, chaotic, community-driven.
-
-    Doors 7pm. $43
-
-    axs.com/events/1476563/show-me-the-body-tickets'
+  location: Near Union Square, New York NY (address in confirmation)
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1876555987064524339
 - uid: the-immortal-ball-masquerade-masquerade-sat-oct-17-2026-10-17
   summary: The Immortal Ball — masquerade @ Masquerade (Sat Oct 17)
   start: '2026-10-17T23:00:00-04:00'
@@ -179,6 +188,29 @@
   reminders:
   - method: popup
     minutes: 10080
+- uid: kinky-carnival-miss-bloom-verify-venue-2026-10-18
+  summary: Kinky Carnival (Miss Bloom) — VERIFY VENUE
+  start: '2026-10-18T19:00:00-04:00'
+  end: '2026-10-18T22:00:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1876688249896467349
+- uid: hmu-academy-floggers-and-florentine-2026-10-19
+  summary: 'HMU Academy: Floggers and Florentine'
+  start: '2026-10-19T19:00:00-04:00'
+  end: '2026-10-19T21:00:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: 120 Walker St floor 5, New York NY
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1877075141933477214
+- uid: poly-connections-game-night-pagans-paradise-2026-10-21
+  summary: 'Poly Connections: Game Night (Pagans Paradise)'
+  start: '2026-10-21T19:00:00-04:00'
+  end: '2026-10-21T22:00:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: Near Herald Square, New York NY (address in confirmation)
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1876659607798892736
 - uid: clayface-film-2026-10-24
   summary: Clayface (film)
   start: '2026-10-24T20:00:00-04:00'
@@ -188,6 +220,14 @@
   reminders:
   - method: popup
     minutes: 10080
+- uid: kinky-speed-dating-and-friending-pagans-paradise-2026-10-28
+  summary: Kinky Speed Dating and Friending (Pagans Paradise)
+  start: '2026-10-28T19:00:00-04:00'
+  end: '2026-10-28T22:00:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: New York NY (address in confirmation)
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1876433648074005728
 - uid: she-wants-revenge-rosegarden-funeral-party-webster-hall-mon--2026-11-02
   summary: She Wants Revenge, Rosegarden Funeral Party @ Webster Hall (Mon Nov 2)
   start: '2026-11-02T19:30:00-05:00'
@@ -216,6 +256,14 @@
   reminders:
   - method: popup
     minutes: 10080
+- uid: poly-connections-karaoke-pagans-paradise-2026-11-11
+  summary: 'Poly Connections: Karaoke (Pagans Paradise)'
+  start: '2026-11-11T19:00:00-05:00'
+  end: '2026-11-11T22:00:00-05:00'
+  timezone: America/New_York
+  all_day: false
+  location: Near Herald Square, New York NY (address in confirmation)
+  description: https://mail.google.com/mail/?authuser=juliangrebe@gmail.com#all/thread-f:1876006611493099212
 - uid: emma-ruth-rundle-cinder-well-saint-vitus-thu-dec-10-2026-12-10
   summary: Emma Ruth Rundle, Cinder Well @ Saint Vitus (Thu Dec 10)
   start: '2026-12-10T19:30:00-05:00'

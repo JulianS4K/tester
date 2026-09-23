@@ -1,0 +1,25 @@
+- uid: boxing-beginner-w-maksym-kots-church-st-boxing-chelsea
+  summary: Boxing – Beginner w/ Maksym Kots @ Church St Boxing (Chelsea)
+  start: '2026-09-29T19:30:00-04:00'
+  end: '2026-09-29T20:30:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: Church Street Boxing Gym, Chelsea, New York, NY
+  description: 'Boxing – Beginner (60 min) with Maksym Kots at Church Street Boxing, Chelsea location.<br><br>12-week
+    block toward readiness for the next level. Tuesdays 7:30pm.<br><br>PLEASE READ:<br>- Register in ADVANCE
+    — class size strictly enforced, registration opens Sep 9 for each week''s class.<br>- Loaner gloves
+    provided free.<br>- Arrive on time — guests more than 10 min late are NOT allowed to join.<br>- Late-cancel
+    courtesy: cancel your registration if you can''t make it (limited spots).<br><br>Sessions: Sep 29,
+    Oct 6, 13, 20, 27, Nov 3, 10, 17, 24, Dec 1, 8, 15.<br><br><a href="https://csboxinggymchelsea.com/gym-info/">https://csboxinggymchelsea.com/gym-info/</a>'
+  managed: false
+  notes: recurring series -- owned in Google, not pushed from repo
+- uid: yoga-foundations
+  summary: Yoga Foundations
+  start: '2026-10-05T19:30:00-04:00'
+  end: '2026-10-05T20:20:00-04:00'
+  timezone: America/New_York
+  all_day: false
+  location: 1027 Cortelyou Rd
+  description: <a href="https://www.studioumi.nyc/">https://www.studioumi.nyc/</a>
+  managed: false
+  notes: recurring series -- owned in Google, not pushed from repo
