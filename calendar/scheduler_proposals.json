@@ -1,0 +1,189 @@
+{
+  "generated": "2026-09-24T19:56:59+00:00",
+  "window": {
+    "start": "2026-09-21",
+    "weeks": 8
+  },
+  "gaps": [
+    {
+      "week": "2026-09-21",
+      "events": 3,
+      "counts": {
+        "unclassified": 3
+      },
+      "free_days": 4,
+      "rest_day_intact": true,
+      "short": {
+        "physical": 1,
+        "live-music": 2,
+        "kink-community": 1,
+        "learning": 1
+      },
+      "full": false
+    },
+    {
+      "week": "2026-09-28",
+      "events": 10,
+      "counts": {
+        "physical": 3,
+        "unclassified": 6,
+        "kink-community": 1
+      },
+      "free_days": 2,
+      "rest_day_intact": true,
+      "short": {
+        "live-music": 2,
+        "learning": 1
+      },
+      "full": false
+    },
+    {
+      "week": "2026-10-05",
+      "events": 8,
+      "counts": {
+        "learning": 2,
+        "unclassified": 1,
+        "screen-page": 1,
+        "live-music": 1,
+        "kink-community": 1,
+        "physical": 2
+      },
+      "free_days": 2,
+      "rest_day_intact": true,
+      "short": {
+        "live-music": 1
+      },
+      "full": false
+    },
+    {
+      "week": "2026-10-12",
+      "events": 5,
+      "counts": {
+        "live-music": 1,
+        "kink-community": 1,
+        "unclassified": 1,
+        "physical": 2
+      },
+      "free_days": 3,
+      "rest_day_intact": true,
+      "short": {
+        "live-music": 1,
+        "learning": 1
+      },
+      "full": false
+    },
+    {
+      "week": "2026-10-19",
+      "events": 8,
+      "counts": {
+        "learning": 1,
+        "kink-community": 1,
+        "screen-page": 1,
+        "unclassified": 2,
+        "live-music": 1,
+        "physical": 2
+      },
+      "free_days": 1,
+      "rest_day_intact": true,
+      "short": {
+        "live-music": 1
+      },
+      "full": true
+    },
+    {
+      "week": "2026-10-26",
+      "events": 4,
+      "counts": {
+        "kink-community": 1,
+        "unclassified": 1,
+        "physical": 2
+      },
+      "free_days": 3,
+      "rest_day_intact": true,
+      "short": {
+        "live-music": 2,
+        "learning": 1
+      },
+      "full": false
+    },
+    {
+      "week": "2026-11-02",
+      "events": 3,
+      "counts": {
+        "live-music": 2,
+        "physical": 1
+      },
+      "free_days": 4,
+      "rest_day_intact": true,
+      "short": {
+        "learning": 1
+      },
+      "full": false
+    },
+    {
+      "week": "2026-11-09",
+      "events": 3,
+      "counts": {
+        "kink-community": 1,
+        "unclassified": 1,
+        "physical": 1
+      },
+      "free_days": 4,
+      "rest_day_intact": true,
+      "short": {
+        "live-music": 2,
+        "learning": 1
+      },
+      "full": false
+    }
+  ],
+  "propose": [
+    {
+      "summary": "HMU BIPOC Mixer & Open House",
+      "start": "2026-10-29T19:00:00-04:00",
+      "location": "120 Walker St floor 6, New York NY",
+      "slot": "kink-community",
+      "week": "2026-10-26",
+      "score": -9,
+      "fills": null
+    },
+    {
+      "summary": "Naked Yoga New York",
+      "start": "2026-10-03T12:00:00-04:00",
+      "location": "Pagans Paradise, New York NY",
+      "slot": "physical",
+      "week": "2026-09-28",
+      "score": -10,
+      "fills": null
+    },
+    {
+      "summary": "Naked Yoga New York",
+      "start": "2026-10-10T12:00:00-04:00",
+      "location": "Pagans Paradise, New York NY",
+      "slot": "physical",
+      "week": "2026-10-05",
+      "score": -10,
+      "fills": null
+    },
+    {
+      "summary": "Scary Island",
+      "start": "2026-10-14T20:30:00-04:00",
+      "location": "Brooklyn Comedy Collective",
+      "slot": "screen-page",
+      "week": "2026-10-12",
+      "score": -10,
+      "fills": null
+    },
+    {
+      "summary": "Julian Hernandez's Improv Level 3 Class Show",
+      "start": "2026-10-18T19:00:00-04:00",
+      "location": "The BCC Pig Pen, Brooklyn NY",
+      "slot": "screen-page",
+      "week": "2026-10-12",
+      "score": -10,
+      "fills": null
+    }
+  ],
+  "held_back": [],
+  "rejected": []
+}

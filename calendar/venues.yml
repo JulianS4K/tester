@@ -1,0 +1,80 @@
+# Venue and performer index, built from DICE ticket history.
+#
+# Source: 26 "Your tickets:" mails from noreply@dice.fm over 400 days to
+# 2026-09-22. This is REVEALED preference -- things actually paid for, not a
+# taste list written down once. `sources.py` defines a source that emits
+# `affinity` rather than events; this is that, and it is the matching key
+# discovery should rank against.
+
+venues:
+  - name: Saint Vitus
+    address: 428 Troutman Street, Brooklyn, NY 11237
+    tickets: 8
+    slot: live-music
+    shows: [Overkill, "Aerobicide: Slimer Edition", Mareux, "Softcult / Sadness / The Sewing Club / Oldest Sea",
+            "Black Sabbath Cover Band Rehearsal", "Pig Destroyer / Undeath / Couch Slut",
+            "Blackbraid / High Command / Gudsforladt", "Immolation / Ancient Death / Siege Column"]
+    note: >-
+      His single most-used venue, nearly a third of all tickets, and already
+      named in STRATEGY as the metal third place. The Terminal feed DOES
+      carry it -- 3 upcoming rows -- correcting an earlier claim of zero
+      that came from the `state` landmine, not from real absence.
+
+  - name: Gold Sounds
+    address: 44 Wilson Ave, Brooklyn, NY 11237
+    tickets: 4
+    slot: live-music
+    note: >-
+      Genuinely absent from the Terminal feed, re-checked 2026-09-22. DICE
+      mail is the only channel that sees it.
+
+  - name: Seventh Heaven Bar & Karaoke
+    address: 4 Irving Avenue, Brooklyn, NY 11237
+    tickets: 3
+    slot: screen-page
+    shows: ["Constantly Hating: Literary Reading", "CLUB WONDER: Literary Reading by Wonder Press",
+            "Pincushion Puppet Club: Puppet Slam"]
+    note: >-
+      A REPEAT VENUE NOBODY HAD NAMED. Three visits, all literary/puppet
+      readings, none of it metal. It is a third place he already returns to
+      and it is the real home of the screen-page slot -- STRATEGY lists bars
+      and cafes as third places but not this.
+
+  - name: Main Drag Music
+    address: 50 South 1st Street, Brooklyn, NY 11249
+    tickets: 3
+    slot: live-music
+    note: >-
+      All three are WINTER MADNESS rounds -- a bracketed series he followed
+      through to the final. A returning-cohort format, which is exactly the
+      repeat-context mechanic the EOY target is chasing. Worth watching for
+      its next season.
+
+  - name: TV Eye
+    address: 1647 Weirfield Street, Queens, NY 11385
+    tickets: 2
+    slot: live-music
+
+  - {name: ALPHAVILLE, address: "140 Wilson Ave, Brooklyn, NY 11237", tickets: 1, slot: screen-page}
+  - {name: Purgatory, address: "675 Central Ave, Brooklyn, NY 11207", tickets: 1, slot: live-music}
+  - {name: The Meadows, address: "17 Meadow St, Brooklyn, NY 11206", tickets: 1, slot: live-music}
+  - {name: Brooklyn Brewery, address: "79 North 11th Street, Brooklyn, NY 11249", tickets: 1, slot: screen-page}
+  - {name: Industry City, address: "67 34th Street, Brooklyn, NY 11232", tickets: 1, slot: live-music}
+  - {name: "Althea's Hideaway NYC", address: "634 West 52nd Street, New York, NY 10019", tickets: 1, slot: kink-community}
+
+# Acts paid for more than once. The list is short because his pattern is
+# venue-loyal, not artist-loyal -- he buys the room, then the bill. Rank
+# discovery on VENUE first and artist second; ranking artist-first would
+# miss most of what he actually goes to.
+repeat_performers:
+  - {name: Cowardice, count: 2, venues: [Gold Sounds]}
+  - {name: Oldest Sea, count: 2, venues: [Gold Sounds, Saint Vitus]}
+
+summary:
+  dice_tickets: 26
+  window: 2025-08 to 2026-09
+  diy_circuit_share: >-
+    16 of 26 tickets are Saint Vitus, Gold Sounds, TV Eye, The Meadows or
+    Purgatory -- the Brooklyn/Queens DIY circuit. The Terminal feed covers
+    Saint Vitus, TV Eye and The Meadows; Gold Sounds and Purgatory Brooklyn
+    it does not, and DICE mail is the only channel that sees those.
