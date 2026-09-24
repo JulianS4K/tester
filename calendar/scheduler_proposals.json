@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-23T20:27:58+00:00",
+  "generated": "2026-09-24T19:56:59+00:00",
   "window": {
     "start": "2026-09-21",
     "weeks": 8
@@ -25,29 +25,28 @@
       "week": "2026-09-28",
       "events": 10,
       "counts": {
-        "kink-community": 4,
-        "unclassified": 4,
-        "live-music": 1,
-        "physical": 1
+        "physical": 3,
+        "unclassified": 6,
+        "kink-community": 1
       },
       "free_days": 2,
       "rest_day_intact": true,
       "short": {
-        "live-music": 1,
+        "live-music": 2,
         "learning": 1
       },
       "full": false
     },
     {
       "week": "2026-10-05",
-      "events": 7,
+      "events": 8,
       "counts": {
         "learning": 2,
         "unclassified": 1,
         "screen-page": 1,
         "live-music": 1,
         "kink-community": 1,
-        "physical": 1
+        "physical": 2
       },
       "free_days": 2,
       "rest_day_intact": true,
@@ -58,15 +57,16 @@
     },
     {
       "week": "2026-10-12",
-      "events": 3,
+      "events": 5,
       "counts": {
         "live-music": 1,
-        "kink-community": 2
+        "kink-community": 1,
+        "unclassified": 1,
+        "physical": 2
       },
-      "free_days": 4,
+      "free_days": 3,
       "rest_day_intact": true,
       "short": {
-        "physical": 1,
         "live-music": 1,
         "learning": 1
       },
@@ -74,33 +74,33 @@
     },
     {
       "week": "2026-10-19",
-      "events": 6,
+      "events": 8,
       "counts": {
         "learning": 1,
         "kink-community": 1,
         "screen-page": 1,
         "unclassified": 2,
-        "live-music": 1
+        "live-music": 1,
+        "physical": 2
       },
-      "free_days": 2,
+      "free_days": 1,
       "rest_day_intact": true,
       "short": {
-        "physical": 1,
         "live-music": 1
       },
-      "full": false
+      "full": true
     },
     {
       "week": "2026-10-26",
-      "events": 2,
+      "events": 4,
       "counts": {
         "kink-community": 1,
-        "unclassified": 1
+        "unclassified": 1,
+        "physical": 2
       },
-      "free_days": 5,
+      "free_days": 3,
       "rest_day_intact": true,
       "short": {
-        "physical": 1,
         "live-music": 2,
         "learning": 1
       },
@@ -108,30 +108,30 @@
     },
     {
       "week": "2026-11-02",
-      "events": 2,
+      "events": 3,
       "counts": {
-        "live-music": 2
+        "live-music": 2,
+        "physical": 1
       },
-      "free_days": 5,
+      "free_days": 4,
       "rest_day_intact": true,
       "short": {
-        "physical": 1,
         "learning": 1
       },
       "full": false
     },
     {
       "week": "2026-11-09",
-      "events": 2,
+      "events": 3,
       "counts": {
         "kink-community": 1,
-        "live-music": 1
+        "unclassified": 1,
+        "physical": 1
       },
-      "free_days": 5,
+      "free_days": 4,
       "rest_day_intact": true,
       "short": {
-        "physical": 1,
-        "live-music": 1,
+        "live-music": 2,
         "learning": 1
       },
       "full": false
@@ -139,70 +139,51 @@
   ],
   "propose": [
     {
-      "summary": "Devil Master, Satanic Magick",
-      "start": "2026-10-28T18:00:00-04:00",
-      "location": "Saint Vitus",
-      "slot": "live-music",
+      "summary": "HMU BIPOC Mixer & Open House",
+      "start": "2026-10-29T19:00:00-04:00",
+      "location": "120 Walker St floor 6, New York NY",
+      "slot": "kink-community",
       "week": "2026-10-26",
-      "score": 219,
-      "fills": "live-music"
+      "score": -9,
+      "fills": null
     },
     {
-      "summary": "SPY, Empty Shell Casing, Spite House, No Guard",
-      "start": "2026-10-18T18:00:00-04:00",
-      "location": "Saint Vitus",
-      "slot": "live-music",
-      "week": "2026-10-12",
-      "score": 118,
-      "fills": "live-music"
-    },
-    {
-      "summary": "Krallice, Veldune",
-      "start": "2026-10-05T18:00:00-04:00",
-      "location": "Saint Vitus",
-      "slot": "live-music",
-      "week": "2026-10-05",
-      "score": 116,
-      "fills": "live-music"
-    },
-    {
-      "summary": "HMU PilaTEASE class",
-      "start": "2026-11-12T19:00:00-05:00",
-      "location": "HMU, 120 Walker St",
+      "summary": "Naked Yoga New York",
+      "start": "2026-10-03T12:00:00-04:00",
+      "location": "Pagans Paradise, New York NY",
       "slot": "physical",
-      "week": "2026-11-09",
-      "score": 103,
-      "fills": "physical"
+      "week": "2026-09-28",
+      "score": -10,
+      "fills": null
     },
     {
-      "summary": "Archgoat",
-      "start": "2026-11-08T18:30:00-05:00",
-      "location": "The Meadows - Brooklyn",
-      "slot": "live-music",
-      "week": "2026-11-02",
-      "score": -5,
+      "summary": "Naked Yoga New York",
+      "start": "2026-10-10T12:00:00-04:00",
+      "location": "Pagans Paradise, New York NY",
+      "slot": "physical",
+      "week": "2026-10-05",
+      "score": -10,
+      "fills": null
+    },
+    {
+      "summary": "Scary Island",
+      "start": "2026-10-14T20:30:00-04:00",
+      "location": "Brooklyn Comedy Collective",
+      "slot": "screen-page",
+      "week": "2026-10-12",
+      "score": -10,
+      "fills": null
+    },
+    {
+      "summary": "Julian Hernandez's Improv Level 3 Class Show",
+      "start": "2026-10-18T19:00:00-04:00",
+      "location": "The BCC Pig Pen, Brooklyn NY",
+      "slot": "screen-page",
+      "week": "2026-10-12",
+      "score": -10,
       "fills": null
     }
   ],
   "held_back": [],
-  "rejected": [
-    {
-      "summary": "HMU Academy: Seamless Play",
-      "start": "2026-09-24T19:00:00-04:00",
-      "location": "HMU, 120 Walker St",
-      "reason": "tombstoned -- deleted by hand"
-    },
-    {
-      "summary": "HMU Game and Craft Night",
-      "start": "2026-09-28T19:00:00-04:00",
-      "location": "HMU, 120 Walker St",
-      "reason": "tombstoned -- deleted by hand"
-    },
-    {
-      "summary": "Unwind: Stretch and Relax Yoga",
-      "start": "2026-09-28T18:30:00-04:00",
-      "location": "Near Herald Square",
-      "reason": "tombstoned -- deleted by hand"
-    }
-  ]
+  "rejected": []
 }

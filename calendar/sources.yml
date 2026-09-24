@@ -199,9 +199,14 @@ slots:
       - organizer: Brooklyn Comedy Collective
         channel: gmail
         senders: [noreply@reminder.eventbrite.com]
+        classifies_as: screen-page
         coverage: >-
           Improv and sketch shows, high volume. Not classes, but it is the
           scene improv sits in -- useful for scouting teams and venues.
+          Listed here for that scouting value, but what it ANNOUNCES is
+          shows, so `classifies_as` sends its events to screen-page. Without
+          that the scheduler filed a comedy show as a learning slot and
+          reported the improv gap closed.
       - organizer: Bryant Park Corporation
         channel: gmail
         senders: [noreply@reminder.eventbrite.com]

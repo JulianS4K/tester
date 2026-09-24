@@ -80,39 +80,72 @@ def week_of(date_str):
 # --------------------------------------------------------------------------
 
 def _slot_index():
-    """venue name / organizer -> slot, built from the registries."""
-    index = {}
+    """Two separate maps, because they are not equally trustworthy.
+
+    A venue is a strong signal -- Saint Vitus is a music room whatever is on.
+    An ORGANIZER is weak: Pagans Paradise runs kink parties and a yoga class,
+    Brooklyn Comedy Collective runs improv classes and the shows those classes
+    put on. Folding both into one dict made the organizer win by accident of
+    ordering, which put Naked Yoga in kink-community and a comedy show in
+    learning. They are returned apart so precedence can be explicit.
+    """
+    venues, orgs = {}, {}
     for v in _load(VENUES_PATH).get("venues") or []:
         if v.get("slot"):
-            index[v["name"].lower()] = v["slot"]
+            venues[v["name"].lower()] = v["slot"]
     for slot, spec in (_load(SOURCES_PATH).get("slots") or {}).items():
         for src in spec.get("sources") or []:
             org = (src.get("organizer") or "").lower()
-            if org:
-                index.setdefault(org, slot)
-    return index
+            if not org:
+                continue
+            # An organizer listed under several slots resolves by whichever
+            # was iterated first, which is arbitrary. `classifies_as` on the
+            # source entry settles it explicitly and always wins.
+            hint = src.get("classifies_as")
+            if hint:
+                orgs[org] = hint
+            else:
+                orgs.setdefault(org, slot)
+    return {"venues": venues, "orgs": orgs}
 
 
+# Title keywords, checked BEFORE the registries. The title says what the
+# event is; a venue says where, and an organizer only says who booked it.
+# Order matters within the list -- "class show" is a performance you watch,
+# so it has to be tested before the bare "class" that means a course.
 _KEYWORDS = [
-    ("physical", ("boxing", "yoga", "pilates", "pilatease", "soccer", "run", "gym", "wrestling")),
-    ("learning", ("improv", "academy", "class", "workshop", "lesson", "course")),
-    ("kink-community", ("kinky", "kink", "play party", "rope", "munch", "mixer",
-                        "speed dating", "hmu", "sparkle", "fetish", "tantric")),
-    ("live-music", ("@", "presents", "tour", "fest", "dj")),
-    ("screen-page", ("film", "movie", "reading", "book", "comedy", "puppet", "museum")),
-    ("spectator-sport", ("wrestling tv", "match", "game night vs")),
+    ("screen-page", ("class show", "film", "movie", "screening", "reading",
+                     "book launch", "comedy", "puppet", "museum", "trivia")),
+    ("physical", ("yoga", "boxing", "pilates", "pilatease", "soccer", "wrestling",
+                  "run club", "gym", "fitness", "dance release")),
+    ("learning", ("improv level", "academy", "workshop", "lesson", "course",
+                  "101", "intro to", " class")),
+    ("kink-community", ("kinky", "kink", "play party", "rope jam", "munch",
+                        "mixer", "speed dating", "sparkle", "fetish", "tantric",
+                        "poly ", "open house")),
+    ("live-music", (" @ ", "presents", "tour", "fest", " dj ")),
+    ("spectator-sport", ("tv taping", "match", "vs ")),
 ]
 
 
 def classify_slot(summary, location="", index=None):
-    """Best-effort slot for an event. Venue and organizer beat keywords."""
+    """Slot for an event, most trustworthy signal first.
+
+    Title keywords, then venue, then organizer. An event is what its title
+    says it is; the organizer is the last resort because the ones here run
+    programmes that span slots.
+    """
     index = index if index is not None else _slot_index()
-    hay = f"{summary or ''} {location or ''}".lower()
-    for name, slot in index.items():
+    title = (summary or "").lower()
+    hay = f"{title} {(location or '').lower()}"
+    for slot, words in _KEYWORDS:
+        if any(w in title for w in words):
+            return slot
+    for name, slot in index["venues"].items():
         if name and name in hay:
             return slot
-    for slot, words in _KEYWORDS:
-        if any(w in hay for w in words):
+    for name, slot in index["orgs"].items():
+        if name and name in hay:
             return slot
     return "unclassified"
 
