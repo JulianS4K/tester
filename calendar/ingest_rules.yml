@@ -115,5 +115,22 @@ rules:
     subject_prefix: "Reminder for "
     class: ignore          # reminder for a ticket already confirmed elsewhere
 
+# ---- inbox hygiene -------------------------------------------------------
+# A processed announcement is marked READ. Unread is the queue: it means
+# nobody has looked at this yet, so leaving processed mail unread makes the
+# queue lie and the next pass re-reads what it already handled.
+#
+# Scope is what was ACTUALLY processed -- surfaced to Julian and decided on,
+# scheduled or not. Never a blanket sweep of the sender: there are ~200
+# unread Eventbrite threads going back months that nobody has evaluated, and
+# marking those read would destroy the only signal saying so.
+#
+# Read is not the same as kept. Marking read records that it was considered;
+# what became of it lives on the calendar or in tombstones.yml.
+on_processed:
+  mark_read: true
+  scope: processed-only
+  never: blanket-sweep-by-sender
+
 # Anything whose sender matches no rule is reported as `unmatched` so new
 # vendors surface for review instead of being silently dropped.
